@@ -6,12 +6,7 @@ from bot.api.texts import CLIENT_MENU_HINT
 
 stubs_router = Router(name="client.stubs")
 
-STUB_CALLBACKS = (
-    ClientMenuCallback.FIND_DEALER,
-    ClientMenuCallback.SERVICE,
-    ClientMenuCallback.CHAT,
-    ClientMenuCallback.CALL,
-)
+STUB_CALLBACKS = (ClientMenuCallback.FIND_DEALER,)
 
 
 @stubs_router.callback_query(F.data.in_(set(STUB_CALLBACKS)))

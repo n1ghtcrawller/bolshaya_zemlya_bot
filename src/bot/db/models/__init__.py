@@ -7,6 +7,7 @@ from bot.db.models.expo import Expo
 from bot.db.models.product import Product
 from bot.db.models.product_category import ProductCategory
 from bot.db.models.sales_material import SalesMaterial
+from bot.db.models.service_request import ServiceRequest
 from bot.db.models.user import User
 
 __all__ = [
@@ -19,5 +20,6 @@ __all__ = [
     "Product",
     "ProductCategory",
     "SalesMaterial",
+    "ServiceRequest",
     "User",
 ]

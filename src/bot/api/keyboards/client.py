@@ -103,3 +103,37 @@ def requests_list_kb(request_ids: list[int]) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="◀️ В меню", callback_data="client:back_to_menu")]
     )
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def service_issue_types_kb() -> InlineKeyboardMarkup:
+    from bot.api.texts import SERVICE_ISSUE_LABELS
+
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=SERVICE_ISSUE_LABELS["warranty"],
+                    callback_data="client:srv:issue:warranty",
+                ),
+                InlineKeyboardButton(
+                    text=SERVICE_ISSUE_LABELS["repair"],
+                    callback_data="client:srv:issue:repair",
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=SERVICE_ISSUE_LABELS["spare_parts"],
+                    callback_data="client:srv:issue:spare_parts",
+                ),
+                InlineKeyboardButton(
+                    text=SERVICE_ISSUE_LABELS["other"],
+                    callback_data="client:srv:issue:other",
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text="◀️ В меню", callback_data="client:back_to_menu"
+                )
+            ],
+        ]
+    )

@@ -12,12 +12,17 @@ class MktMenuCallback:
     EXPOS = "mkt:expos"
     EXPO_ASSISTANT = "mkt:expo:ai"
     CATALOG = "mkt:catalog"
+    MODERATION = "mkt:mod"
     BACK_TO_MENU = "mkt:back_to_menu"
 
 
 CB_CATALOG_NEW_CATEGORY = "mkt:cat:newcat"
 CB_CATALOG_NEW_PRODUCT = "mkt:cat:newprod"
 CB_CATALOG_PICK_CATEGORY = "mkt:cat:pick"
+
+CB_MOD_VIEW = "mkt:mod:view"
+CB_MOD_APPROVE = "mkt:mod:approve"
+CB_MOD_REJECT = "mkt:mod:reject"
 
 CB_USERS_ROLE = "mkt:users:role"
 CB_USER_VIEW = "mkt:user:view"
@@ -71,9 +76,52 @@ def marketing_main_menu() -> InlineKeyboardMarkup:
                     callback_data=MktMenuCallback.CATALOG,
                 ),
                 InlineKeyboardButton(
+                    text="🛡 Модерация материалов",
+                    callback_data=MktMenuCallback.MODERATION,
+                ),
+            ],
+            [
+                InlineKeyboardButton(
                     text="🤖 ИИ-помощник (Выставки)",
                     callback_data=MktMenuCallback.EXPO_ASSISTANT,
                 ),
+            ],
+        ]
+    )
+
+
+def moderation_list_kb(material_ids: list[int]) -> InlineKeyboardMarkup:
+    rows = [
+        [
+            InlineKeyboardButton(
+                text=f"Открыть #{mid}", callback_data=f"{CB_MOD_VIEW}:{mid}"
+            )
+        ]
+        for mid in material_ids
+    ]
+    rows.append(
+        [InlineKeyboardButton(text="◀️ В меню", callback_data=MktMenuCallback.BACK_TO_MENU)]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def moderation_actions_kb(material_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="✅ Одобрить",
+                    callback_data=f"{CB_MOD_APPROVE}:{material_id}",
+                ),
+                InlineKeyboardButton(
+                    text="❌ Отклонить",
+                    callback_data=f"{CB_MOD_REJECT}:{material_id}",
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text="◀️ К очереди", callback_data=MktMenuCallback.MODERATION
+                )
             ],
         ]
     )

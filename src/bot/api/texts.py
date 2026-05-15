@@ -333,3 +333,123 @@ MKT_CATALOG_PRODUCT_ASK_PHOTO = (
 )
 MKT_CATALOG_PRODUCT_CREATED = "✅ Товар «{name}» (id={id}) добавлен в категорию «{category}»."
 MKT_CATALOG_NO_CATEGORIES = "Сначала создайте хотя бы одну категорию."
+
+# Lead types
+LEAD_TYPE_LABELS = {
+    "request": "📝 заявка",
+    "consultation": "💬 консультация",
+    "callback": "📞 обратный звонок",
+}
+
+# Service requests
+SERVICE_ISSUE_LABELS = {
+    "warranty": "🛡 Гарантия",
+    "repair": "🔧 Ремонт",
+    "spare_parts": "🔩 Запчасти",
+    "other": "📋 Другое",
+}
+SERVICE_STATUS_LABELS = {
+    "new": "🆕 новое",
+    "in_progress": "⚙️ в работе",
+    "done": "✅ закрыто",
+    "rejected": "❌ отклонено",
+}
+
+# Client: chat with manager (creates consultation lead)
+CLIENT_CHAT_INTRO = (
+    "💬 Чат с менеджером\n\n"
+    "Опишите ваш вопрос — менеджер свяжется с вами в Telegram или по телефону. "
+    "После этого автоматически создаётся обращение, которое попадает в работу."
+)
+CLIENT_CHAT_ASK_TOPIC = "Опишите вашу тему обращения:"
+CLIENT_CHAT_ASK_PHONE = (
+    "Укажите телефон для связи (или нажмите «📱 Поделиться контактом»):"
+)
+CLIENT_CHAT_CREATED = "✅ Обращение #{id} создано. Менеджер свяжется с вами."
+
+# Client: callback
+CLIENT_CALLBACK_INTRO = (
+    "📞 Заказать звонок\n\n"
+    "Оставьте телефон — менеджер перезвонит в ближайшее рабочее время."
+)
+CLIENT_CALLBACK_ASK_PHONE = (
+    "Укажите телефон для звонка (или нажмите «📱 Поделиться контактом»):"
+)
+CLIENT_CALLBACK_ASK_NOTE = (
+    "Уточните удобное время и кратко тему звонка (или отправьте «-»):"
+)
+CLIENT_CALLBACK_CREATED = "✅ Запрос на звонок #{id} принят. Менеджер перезвонит."
+
+# Client: service request
+CLIENT_SERVICE_INTRO = (
+    "🔧 Сервис и запчасти\n\nВыберите тип обращения:"
+)
+CLIENT_SERVICE_ASK_EQUIPMENT = (
+    "Укажите модель техники (или «-» если не знаете):"
+)
+CLIENT_SERVICE_ASK_DESCRIPTION = "Опишите проблему / что требуется:"
+CLIENT_SERVICE_ASK_PHONE = (
+    "Укажите телефон для связи (или «📱 Поделиться контактом»):"
+)
+CLIENT_SERVICE_CREATED = (
+    "✅ Сервисное обращение #{id} создано.\n"
+    "С вами свяжется ответственный диллер."
+)
+
+# Dealer: service requests
+DEALER_SERVICE_LIST_EMPTY = "Сервисных обращений пока нет."
+DEALER_SERVICE_LIST_HEADER = "🔧 Сервисные обращения ({total})"
+DEALER_SERVICE_LINE = (
+    "#{id} · {issue} · {status} · {created_at:%d.%m.%Y %H:%M}\n"
+    "   {equipment} · тел. {phone}"
+)
+DEALER_SERVICE_DETAILS = (
+    "🔧 Обращение #{id}\n"
+    "Тип: {issue}\n"
+    "Статус: {status}\n"
+    "Создано: {created_at:%d.%m.%Y %H:%M}\n\n"
+    "Техника: {equipment}\n"
+    "Телефон: {phone}\n\n"
+    "Описание:\n{description}"
+)
+DEALER_SERVICE_NOT_FOUND = "Обращение не найдено или уже взято другим диллером."
+DEALER_SERVICE_TAKEN = "⚙️ Обращение #{id} взято в работу."
+DEALER_SERVICE_DONE = "✅ Обращение #{id} закрыто."
+DEALER_SERVICE_REJECTED = "❌ Обращение #{id} отклонено."
+
+# Dealer: submit material for review
+DEALER_MATERIALS_MENU_HEADER = "📚 Продающие материалы"
+DEALER_MATERIAL_SUBMIT_INTRO = (
+    "✍️ Загрузка локального материала на согласование с маркетингом.\n"
+    "Выберите категорию:"
+)
+DEALER_MATERIAL_SUBMIT_ASK_FILE = (
+    "Пришлите файл, фото, видео или GIF."
+)
+DEALER_MATERIAL_SUBMIT_ASK_TITLE = "Название материала:"
+DEALER_MATERIAL_SUBMIT_ASK_DESCRIPTION = (
+    "Опишите материал (по желанию) или «-» чтобы пропустить:"
+)
+DEALER_MATERIAL_SUBMITTED = (
+    "📤 Материал #{id} «{title}» отправлен на согласование маркетингу. "
+    "Когда его одобрят — он появится у всех диллеров."
+)
+
+# Marketing: moderation
+MKT_MODERATION_MENU = "🛡 Модерация материалов"
+MKT_MODERATION_EMPTY = "Очередь модерации пуста."
+MKT_MODERATION_LIST_HEADER = "🛡 На модерации: {total}"
+MKT_MODERATION_ITEM_LINE = (
+    "#{id} · {category} · {file_type}\n"
+    "   👤 от пользователя #{author_id}: {title}"
+)
+MKT_MODERATION_NOT_FOUND = "Материал не найден или уже обработан."
+MKT_MODERATION_APPROVED = "✅ Материал #{id} одобрен. Доступен всем диллерам."
+MKT_MODERATION_REJECTED = "❌ Материал #{id} отклонён."
+MKT_MODERATION_DETAILS = (
+    "🛡 Материал #{id}\n"
+    "Категория: {category}\n"
+    "Тип файла: {file_type}\n"
+    "От пользователя: #{author_id}\n\n"
+    "<b>{title}</b>\n{description}"
+)

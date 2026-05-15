@@ -23,6 +23,14 @@ CB_MATERIAL_SEND = "dealer:mat:send"
 
 CB_PROFILE_EDIT = "dealer:profile:edit"
 
+CB_SERVICE_VIEW = "dealer:srv:view"
+CB_SERVICE_TAKE = "dealer:srv:take"
+CB_SERVICE_DONE = "dealer:srv:done"
+CB_SERVICE_REJECT = "dealer:srv:reject"
+
+CB_MATERIAL_SUBMIT = "dealer:mat:submit"
+CB_MATERIAL_SUBMIT_CATEGORY = "dealer:mat:submit:cat"
+
 
 def dealer_main_menu() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
@@ -169,6 +177,97 @@ def materials_page_kb(
                 text="◀️ К разделам", callback_data=DealerMenuCallback.MATERIALS
             )
         ]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def service_list_kb(request_ids: list[int]) -> InlineKeyboardMarkup:
+    rows = [
+        [InlineKeyboardButton(text=f"Открыть #{rid}", callback_data=f"{CB_SERVICE_VIEW}:{rid}")]
+        for rid in request_ids
+    ]
+    rows.append(
+        [InlineKeyboardButton(text="◀️ В меню", callback_data=DealerMenuCallback.BACK_TO_MENU)]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def service_actions_kb(request_id: int, status_value: str) -> InlineKeyboardMarkup:
+    rows: list[list[InlineKeyboardButton]] = []
+    if status_value == "new":
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text="⚙️ Взять в работу", callback_data=f"{CB_SERVICE_TAKE}:{request_id}"
+                )
+            ]
+        )
+    if status_value in ("new", "in_progress"):
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text="✅ Закрыть", callback_data=f"{CB_SERVICE_DONE}:{request_id}"
+                ),
+                InlineKeyboardButton(
+                    text="❌ Отклонить",
+                    callback_data=f"{CB_SERVICE_REJECT}:{request_id}",
+                ),
+            ]
+        )
+    rows.append(
+        [
+            InlineKeyboardButton(
+                text="◀️ К списку",
+                callback_data=DealerMenuCallback.SERVICE_REQUESTS,
+            )
+        ]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def material_submit_categories_kb() -> InlineKeyboardMarkup:
+    from bot.api.texts import MATERIAL_CATEGORY_LABELS
+    from bot.core.enums import SalesMaterialCategory
+
+    rows = [
+        [
+            InlineKeyboardButton(
+                text=MATERIAL_CATEGORY_LABELS[cat.value],
+                callback_data=f"{CB_MATERIAL_SUBMIT_CATEGORY}:{cat.value}",
+            )
+        ]
+        for cat in SalesMaterialCategory
+    ]
+    rows.append(
+        [InlineKeyboardButton(text="◀️ В меню", callback_data=DealerMenuCallback.BACK_TO_MENU)]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def materials_categories_with_submit_kb() -> InlineKeyboardMarkup:
+    """Категории материалов + кнопка «загрузить локальный»."""
+    from bot.api.texts import MATERIAL_CATEGORY_LABELS
+    from bot.core.enums import SalesMaterialCategory
+
+    rows = [
+        [
+            InlineKeyboardButton(
+                text=MATERIAL_CATEGORY_LABELS[cat.value],
+                callback_data=f"{CB_MATERIAL_CATEGORY}:{cat.value}",
+            )
+        ]
+        for cat in SalesMaterialCategory
+    ]
+    rows.append(
+        [
+            InlineKeyboardButton(
+                text="✍️ Загрузить на согласование",
+                callback_data=CB_MATERIAL_SUBMIT,
+            )
+        ]
+    )
+    rows.append(
+        [InlineKeyboardButton(text="◀️ В меню", callback_data=DealerMenuCallback.BACK_TO_MENU)]
     )
     return InlineKeyboardMarkup(inline_keyboard=rows)
 

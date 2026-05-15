@@ -17,6 +17,7 @@ from bot.api.keyboards.sales import (
     regions_kb,
 )
 from bot.api.texts import (
+    LEAD_TYPE_LABELS,
     SALES_LEAD_ALREADY_TAKEN,
     SALES_LEAD_DETAILS,
     SALES_LEAD_NOT_FOUND,
@@ -48,9 +49,14 @@ def _status_label(status_value: str) -> str:
     return STATUS_LABELS.get(status_value, status_value)
 
 
+def _lead_type_label(value: str) -> str:
+    return LEAD_TYPE_LABELS.get(value, value)
+
+
 def _render_short(lead) -> str:
     return (
-        f"#{lead.id} · {_status_label(lead.status.value)} · "
+        f"#{lead.id} · {_lead_type_label(lead.lead_type.value)} · "
+        f"{_status_label(lead.status.value)} · "
         f"{lead.created_at:%d.%m.%Y %H:%M}\n"
         f"   {lead.contact_name} · {lead.contact_phone}"
     )
@@ -132,7 +138,7 @@ async def view_lead(call: CallbackQuery, session: AsyncSession) -> None:
         return
     text = SALES_LEAD_DETAILS.format(
         id=lead.id,
-        status=_status_label(lead.status.value),
+        status=f"{_lead_type_label(lead.lead_type.value)} · {_status_label(lead.status.value)}",
         created_at=lead.created_at,
         contact_name=lead.contact_name,
         contact_phone=lead.contact_phone,

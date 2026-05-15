@@ -50,3 +50,29 @@ class BroadcastStatus(StrEnum):
     QUEUED = "queued"
     SENT = "sent"
     FAILED = "failed"
+
+
+class LeadType(StrEnum):
+    REQUEST = "request"
+    CONSULTATION = "consultation"
+    CALLBACK = "callback"
+
+
+class ServiceIssueType(StrEnum):
+    WARRANTY = "warranty"
+    REPAIR = "repair"
+    SPARE_PARTS = "spare_parts"
+    OTHER = "other"
+
+
+class ServiceRequestStatus(StrEnum):
+    NEW = "new"
+    IN_PROGRESS = "in_progress"
+    DONE = "done"
+    REJECTED = "rejected"
+
+
+class ApprovalStatus(StrEnum):
+    APPROVED = "approved"
+    PENDING = "pending"
+    REJECTED = "rejected"

@@ -8,7 +8,7 @@ from bot.api.keyboards.dealer import (
     CB_MATERIAL_SEND,
     DealerMenuCallback,
     back_to_menu,
-    materials_categories_kb,
+    materials_categories_with_submit_kb,
     materials_page_kb,
 )
 from bot.api.texts import (
@@ -28,7 +28,7 @@ async def show_categories(call: CallbackQuery) -> None:
     await call.answer()
     if call.message is None:
         return
-    await call.message.answer(DEALER_MATERIALS_HEADER, reply_markup=materials_categories_kb())
+    await call.message.answer(DEALER_MATERIALS_HEADER, reply_markup=materials_categories_with_submit_kb())
 
 
 @materials_router.callback_query(F.data.startswith(f"{CB_MATERIAL_CATEGORY}:"))
@@ -106,7 +106,7 @@ async def _render_page(
     if not items:
         await call.message.answer(
             f"{label}\n\n{DEALER_MATERIALS_EMPTY}",
-            reply_markup=materials_categories_kb(),
+            reply_markup=materials_categories_with_submit_kb(),
         )
         return
     lines = [label, ""]

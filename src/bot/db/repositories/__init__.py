@@ -8,6 +8,7 @@ from bot.db.repositories.expo import ExpoRepository
 from bot.db.repositories.product import ProductRepository
 from bot.db.repositories.product_category import ProductCategoryRepository
 from bot.db.repositories.sales_material import SalesMaterialRepository
+from bot.db.repositories.service_request import ServiceRequestRepository
 from bot.db.repositories.user import UserRepository
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     "ProductCategoryRepository",
     "ProductRepository",
     "SalesMaterialRepository",
+    "ServiceRequestRepository",
     "UserRepository",
 ]

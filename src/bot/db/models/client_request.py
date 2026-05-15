@@ -1,7 +1,7 @@
 from sqlalchemy import Enum, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from bot.core.enums import RequestStatus
+from bot.core.enums import LeadType, RequestStatus
 from bot.db.base import Base, TimestampMixin
 from bot.db.models.user import User
 
@@ -18,6 +18,12 @@ class ClientRequest(Base, TimestampMixin):
     contact_phone: Mapped[str] = mapped_column(String(32), nullable=False)
     comment: Mapped[str | None] = mapped_column(Text)
 
+    lead_type: Mapped[LeadType] = mapped_column(
+        Enum(LeadType, name="lead_type", native_enum=False, length=32),
+        nullable=False,
+        default=LeadType.REQUEST,
+        index=True,
+    )
     status: Mapped[RequestStatus] = mapped_column(
         Enum(RequestStatus, name="request_status", native_enum=False, length=32),
         nullable=False,

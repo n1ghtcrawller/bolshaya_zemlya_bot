@@ -9,6 +9,7 @@ from bot.api.handlers.marketing.dashboard import dashboard_router
 from bot.api.handlers.marketing.expos import expos_router
 from bot.api.handlers.marketing.materials_upload import materials_router
 from bot.api.handlers.marketing.menu import menu_router
+from bot.api.handlers.marketing.moderation import moderation_router
 from bot.api.handlers.marketing.users import users_router
 from bot.core.enums import UserRole
 
@@ -26,6 +27,7 @@ def build_marketing_router() -> Router:
     router.include_router(content_router)
     router.include_router(expos_router)
     router.include_router(catalog_admin_router)
+    router.include_router(moderation_router)
     router.include_router(assistant_router)
     return router
 

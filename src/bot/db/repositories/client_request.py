@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.core.enums import RequestStatus
+from bot.core.enums import LeadType, RequestStatus
 from bot.db.models.client_request import ClientRequest
 
 
@@ -124,6 +124,7 @@ class ClientRequestRepository:
         contact_name: str,
         contact_phone: str,
         comment: str | None,
+        lead_type: LeadType = LeadType.REQUEST,
     ) -> ClientRequest:
         request = ClientRequest(
             user_id=user_id,
@@ -131,6 +132,7 @@ class ClientRequestRepository:
             contact_phone=contact_phone,
             comment=comment,
             status=RequestStatus.NEW,
+            lead_type=lead_type,
         )
         self._session.add(request)
         await self._session.flush()

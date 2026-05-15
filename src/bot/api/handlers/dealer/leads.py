@@ -18,6 +18,7 @@ from bot.api.texts import (
     DEALER_LEAD_STATUS_UPDATED,
     DEALER_LEADS_EMPTY,
     DEALER_LEADS_HEADER,
+    LEAD_TYPE_LABELS,
     STATUS_LABELS,
 )
 from bot.db.models.user import User
@@ -28,6 +29,10 @@ leads_router = Router(name="dealer.leads")
 
 def _status_label(status_value: str) -> str:
     return STATUS_LABELS.get(status_value, status_value)
+
+
+def _lead_type_label(value: str) -> str:
+    return LEAD_TYPE_LABELS.get(value, value)
 
 
 @leads_router.callback_query(F.data == DealerMenuCallback.LEADS)
@@ -44,8 +49,9 @@ async def show_leads(call: CallbackQuery, app_user: User, session: AsyncSession)
     lines = [DEALER_LEADS_HEADER.format(total=len(leads)), ""]
     for lead in leads:
         lines.append(
-            "#{id} · {status} · {created_at:%d.%m.%Y %H:%M}".format(
+            "#{id} · {type} · {status} · {created_at:%d.%m.%Y %H:%M}".format(
                 id=lead.id,
+                type=_lead_type_label(lead.lead_type.value),
                 status=_status_label(lead.status.value),
                 created_at=lead.created_at,
             )
@@ -71,7 +77,7 @@ async def view_lead(call: CallbackQuery, app_user: User, session: AsyncSession) 
         return
     text = DEALER_LEAD_DETAILS.format(
         id=lead.id,
-        status=_status_label(lead.status.value),
+        status=f"{_lead_type_label(lead.lead_type.value)} · {_status_label(lead.status.value)}",
         created_at=lead.created_at,
         contact_name=lead.contact_name,
         contact_phone=lead.contact_phone,

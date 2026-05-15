@@ -2,6 +2,7 @@ from aiogram import Router
 
 from bot.api.filters import RoleFilter
 from bot.api.handlers.dealer.leads import leads_router
+from bot.api.handlers.dealer.material_submit import material_submit_router
 from bot.api.handlers.dealer.materials import materials_router
 from bot.api.handlers.dealer.menu import menu_router
 from bot.api.handlers.dealer.profile import profile_router
@@ -18,6 +19,7 @@ def build_dealer_router() -> Router:
     router.include_router(menu_router)
     router.include_router(leads_router)
     router.include_router(materials_router)
+    router.include_router(material_submit_router)
     router.include_router(service_requests_router)
     router.include_router(stats_router)
     router.include_router(profile_router)
