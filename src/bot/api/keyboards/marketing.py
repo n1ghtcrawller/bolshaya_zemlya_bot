@@ -31,6 +31,8 @@ CB_DASH_PRODUCTS = "mkt:dash:products"
 CB_USERS_ROLE = "mkt:users:role"
 CB_USER_VIEW = "mkt:user:view"
 CB_USER_SET_ROLE = "mkt:user:setrole"
+CB_USER_DELETE = "mkt:user:delete"
+CB_USER_DELETE_CONFIRM = "mkt:user:delete:yes"
 
 CB_MATERIAL_CATEGORY = "mkt:mat:cat"
 
@@ -226,20 +228,47 @@ def roles_kb(callback_prefix: str, *, include_back: bool = True) -> InlineKeyboa
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def user_card_kb(user_id: int) -> InlineKeyboardMarkup:
+def user_card_kb(user_id: int, *, can_delete: bool = False) -> InlineKeyboardMarkup:
+    rows = [
+        [
+            InlineKeyboardButton(
+                text="✏️ Сменить роль",
+                callback_data=f"{CB_USER_VIEW}:setrole:{user_id}",
+            )
+        ],
+    ]
+    if can_delete:
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text="🗑 Удалить пользователя",
+                    callback_data=f"{CB_USER_DELETE}:{user_id}",
+                )
+            ]
+        )
+    rows.append(
+        [
+            InlineKeyboardButton(
+                text="◀️ В меню", callback_data=MktMenuCallback.BACK_TO_MENU
+            )
+        ]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def user_delete_confirm_kb(user_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="✏️ Сменить роль",
-                    callback_data=f"{CB_USER_VIEW}:setrole:{user_id}",
-                )
-            ],
-            [
+                    text="🗑 Удалить",
+                    callback_data=f"{CB_USER_DELETE_CONFIRM}:{user_id}",
+                ),
                 InlineKeyboardButton(
-                    text="◀️ В меню", callback_data=MktMenuCallback.BACK_TO_MENU
-                )
-            ],
+                    text="✖️ Отмена",
+                    callback_data=f"{CB_USER_VIEW}:open:{user_id}",
+                ),
+            ]
         ]
     )
 

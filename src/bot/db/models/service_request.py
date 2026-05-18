@@ -1,8 +1,8 @@
-from sqlalchemy import Enum, ForeignKey, String, Text
+from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from bot.core.enums import ServiceIssueType, ServiceRequestStatus
-from bot.db.base import Base, TimestampMixin
+from bot.db.base import Base, TimestampMixin, lower_enum
 from bot.db.models.user import User
 
 
@@ -20,7 +20,7 @@ class ServiceRequest(Base, TimestampMixin):
     )
 
     issue_type: Mapped[ServiceIssueType] = mapped_column(
-        Enum(ServiceIssueType, name="service_issue_type", native_enum=False, length=32),
+        lower_enum(ServiceIssueType, name="service_issue_type"),
         nullable=False,
         index=True,
     )
@@ -29,7 +29,7 @@ class ServiceRequest(Base, TimestampMixin):
     contact_phone: Mapped[str] = mapped_column(String(32), nullable=False)
 
     status: Mapped[ServiceRequestStatus] = mapped_column(
-        Enum(ServiceRequestStatus, name="service_request_status", native_enum=False, length=32),
+        lower_enum(ServiceRequestStatus, name="service_request_status"),
         nullable=False,
         default=ServiceRequestStatus.NEW,
         index=True,

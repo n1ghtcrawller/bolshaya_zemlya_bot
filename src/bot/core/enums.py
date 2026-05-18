@@ -8,6 +8,7 @@ class UserRole(StrEnum):
     HEAD_OF_SALES = "head_of_sales"
     MARKETING = "marketing"
     HEAD_OF_MARKETING = "head_of_marketing"
+    ADMIN = "admin"
 
 
 class RequestStatus(StrEnum):

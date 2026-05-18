@@ -8,6 +8,7 @@ from bot.api.keyboards.dealer import dealer_main_menu
 from bot.api.keyboards.marketing import marketing_main_menu
 from bot.api.keyboards.sales import head_of_sales_main_menu, sales_main_menu
 from bot.api.texts import (
+    ADMIN_MENU_HEADER,
     CLIENT_MENU_HEADER,
     DEALER_MENU_HEADER,
     GREETING_NEW,
@@ -48,6 +49,9 @@ async def _send_role_menu(message: Message, role: UserRole) -> None:
         return
     if role is UserRole.HEAD_OF_MARKETING:
         await message.answer(MKT_MENU_HEADER, reply_markup=marketing_main_menu())
+        return
+    if role is UserRole.ADMIN:
+        await message.answer(ADMIN_MENU_HEADER, reply_markup=marketing_main_menu())
         return
 
 

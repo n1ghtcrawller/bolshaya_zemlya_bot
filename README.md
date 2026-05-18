@@ -155,6 +155,14 @@ Sales → карточка диллера →
 
 Та же роль и то же меню, что у Маркетинга. Отличие — **только** этот пользователь может одобрять / отклонять контент и материалы. Если HeadOfMarketing в БД ещё не назначен — fallback: одобрять может любой маркетолог, чтобы очередь не зависала ([approval_policy.py](src/bot/services/approval_policy.py)).
 
+### ⚙️ Admin
+
+Расширенный Маркетинг — тот же RoleFilter, то же меню. Дополнительно:
+- **🗑 Удаление пользователей** — кнопка появляется в карточке пользователя (👥 Пользователи → открыть карточку). Каскадно удаляет связанные данные: профили, лиды, заявки, материалы, обращения. Защиты: нельзя удалить себя; кнопка не показывается, если зовущий не admin
+- **Одобрение контента/материалов** — обходит политику `head_of_marketing` (admin одобряет всегда)
+
+Назначить первую роль `admin` через SQL (см. ниже).
+
 ## База данных
 
 11 моделей (10 миграций):
@@ -186,6 +194,7 @@ UPDATE users SET role = 'sales'              WHERE telegram_id = 123456789;
 UPDATE users SET role = 'head_of_sales'      WHERE telegram_id = 123456789;
 UPDATE users SET role = 'marketing'          WHERE telegram_id = 123456789;
 UPDATE users SET role = 'head_of_marketing'  WHERE telegram_id = 123456789;
+UPDATE users SET role = 'admin'              WHERE telegram_id = 123456789;
 ```
 
 ```bash

@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Text
+from sqlalchemy import DateTime, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from bot.core.enums import ApprovalStatus
-from bot.db.base import Base, TimestampMixin
+from bot.db.base import Base, TimestampMixin, lower_enum
 from bot.db.models.client_request import ClientRequest
 
 
@@ -30,7 +30,7 @@ class LeadApproval(Base, TimestampMixin):
     )
 
     status: Mapped[ApprovalStatus] = mapped_column(
-        Enum(ApprovalStatus, name="lead_approval_status", native_enum=False, length=32),
+        lower_enum(ApprovalStatus, name="lead_approval_status"),
         nullable=False,
         default=ApprovalStatus.PENDING,
         index=True,

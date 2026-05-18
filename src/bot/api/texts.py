@@ -269,6 +269,17 @@ MKT_USER_CARD = (
 MKT_USER_NOT_FOUND = "Пользователь не найден."
 MKT_USER_PICK_NEW_ROLE = "Выберите новую роль для {full_name}:"
 MKT_USER_ROLE_UPDATED = "Роль пользователя {full_name} изменена на {role}."
+MKT_USER_DELETE_CONFIRM = (
+    "⚠️ Удалить пользователя {full_name} (id={id}, TG={telegram_id})?\n\n"
+    "Будут удалены все связанные данные: профиль, заявки, сервисные обращения, материалы. "
+    "Действие необратимо."
+)
+MKT_USER_DELETED = "🗑 Пользователь {full_name} удалён."
+MKT_USER_DELETE_CANCELLED = "Удаление отменено."
+MKT_USER_CANNOT_DELETE_SELF = "Нельзя удалить самого себя."
+MKT_USER_DELETE_FORBIDDEN = "Удаление пользователей доступно только роли Admin."
+
+ADMIN_MENU_HEADER = "⚙️ Кабинет Админ"
 
 ROLE_LABELS = {
     "client": "Клиент",
@@ -277,6 +288,7 @@ ROLE_LABELS = {
     "head_of_sales": "Head of Sales",
     "marketing": "Маркетинг",
     "head_of_marketing": "Head of Marketing",
+    "admin": "Админ",
 }
 
 MKT_MATERIALS_PICK_CATEGORY = "Выберите категорию для нового материала:"

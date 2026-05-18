@@ -3,6 +3,8 @@ from aiogram.types import CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.api.keyboards.marketing import (
+    CB_USER_DELETE,
+    CB_USER_DELETE_CONFIRM,
     CB_USER_SET_ROLE,
     CB_USER_VIEW,
     CB_USERS_ROLE,
@@ -10,11 +12,16 @@ from bot.api.keyboards.marketing import (
     back_to_menu,
     roles_kb,
     user_card_kb,
+    user_delete_confirm_kb,
     user_pick_role_kb,
     users_list_kb,
 )
 from bot.api.texts import (
+    MKT_USER_CANNOT_DELETE_SELF,
     MKT_USER_CARD,
+    MKT_USER_DELETE_CONFIRM as MKT_USER_DELETE_CONFIRM_TEXT,
+    MKT_USER_DELETE_FORBIDDEN,
+    MKT_USER_DELETED,
     MKT_USER_NOT_FOUND,
     MKT_USER_PICK_NEW_ROLE,
     MKT_USER_ROLE_UPDATED,
@@ -24,9 +31,14 @@ from bot.api.texts import (
 )
 from bot.cache.role_cache import RoleCache
 from bot.core.enums import UserRole
+from bot.db.models.user import User
 from bot.services.user_admin_service import UserAdminService
 
 users_router = Router(name="marketing.users")
+
+
+def _can_delete(actor: User) -> bool:
+    return actor.role is UserRole.ADMIN
 
 
 @users_router.callback_query(F.data == MktMenuCallback.USERS)
@@ -67,7 +79,10 @@ async def list_users(
 
 @users_router.callback_query(F.data.startswith(f"{CB_USER_VIEW}:open:"))
 async def view_user(
-    call: CallbackQuery, session: AsyncSession, role_cache: RoleCache
+    call: CallbackQuery,
+    session: AsyncSession,
+    role_cache: RoleCache,
+    app_user: User,
 ) -> None:
     await call.answer()
     if call.message is None or call.data is None:
@@ -88,7 +103,9 @@ async def view_user(
         role=ROLE_LABELS.get(user.role.value, user.role.value),
         created_at=user.created_at,
     )
-    await call.message.answer(text, reply_markup=user_card_kb(user.id))
+    # Кнопка «Удалить» — только админу, и не для самого себя.
+    can_delete = _can_delete(app_user) and user.id != app_user.id
+    await call.message.answer(text, reply_markup=user_card_kb(user.id, can_delete=can_delete))
 
 
 @users_router.callback_query(F.data.startswith(f"{CB_USER_VIEW}:setrole:"))
@@ -136,6 +153,71 @@ async def set_role(
             full_name=user.full_name, role=ROLE_LABELS[role.value]
         ),
         reply_markup=back_to_menu(),
+    )
+
+
+# --- Удаление пользователя (только admin) ---
+
+
+@users_router.callback_query(F.data.startswith(f"{CB_USER_DELETE}:"))
+async def ask_delete(
+    call: CallbackQuery,
+    session: AsyncSession,
+    role_cache: RoleCache,
+    app_user: User,
+) -> None:
+    await call.answer()
+    if call.message is None or call.data is None:
+        return
+    if not _can_delete(app_user):
+        await call.message.answer(MKT_USER_DELETE_FORBIDDEN, reply_markup=back_to_menu())
+        return
+    # ровно 4 части: mkt:user:delete:<id>
+    user_id = _parse_int(call.data.rsplit(":", 1)[-1])
+    if user_id is None:
+        return
+    service = UserAdminService(session, role_cache)
+    user = await service.get_by_id(user_id)
+    if user is None:
+        await call.message.answer(MKT_USER_NOT_FOUND, reply_markup=back_to_menu())
+        return
+    if user.id == app_user.id:
+        await call.message.answer(MKT_USER_CANNOT_DELETE_SELF, reply_markup=back_to_menu())
+        return
+    await call.message.answer(
+        MKT_USER_DELETE_CONFIRM_TEXT.format(
+            full_name=user.full_name, id=user.id, telegram_id=user.telegram_id
+        ),
+        reply_markup=user_delete_confirm_kb(user.id),
+    )
+
+
+@users_router.callback_query(F.data.startswith(f"{CB_USER_DELETE_CONFIRM}:"))
+async def do_delete(
+    call: CallbackQuery,
+    session: AsyncSession,
+    role_cache: RoleCache,
+    app_user: User,
+) -> None:
+    await call.answer()
+    if call.message is None or call.data is None:
+        return
+    user_id = _parse_int(call.data.rsplit(":", 1)[-1])
+    if user_id is None:
+        return
+    service = UserAdminService(session, role_cache)
+    user, error = await service.delete(user_id=user_id, deleted_by=app_user)
+    if error == "forbidden":
+        await call.message.answer(MKT_USER_DELETE_FORBIDDEN, reply_markup=back_to_menu())
+        return
+    if error == "self_delete":
+        await call.message.answer(MKT_USER_CANNOT_DELETE_SELF, reply_markup=back_to_menu())
+        return
+    if user is None:
+        await call.message.answer(MKT_USER_NOT_FOUND, reply_markup=back_to_menu())
+        return
+    await call.message.answer(
+        MKT_USER_DELETED.format(full_name=user.full_name), reply_markup=back_to_menu()
     )
 
 

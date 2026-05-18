@@ -11,7 +11,7 @@ from bot.db.repositories.user import UserRepository
 
 
 async def can_approve_marketing(session: AsyncSession, user: User) -> bool:
-    if user.role is UserRole.HEAD_OF_MARKETING:
+    if user.role in (UserRole.HEAD_OF_MARKETING, UserRole.ADMIN):
         return True
     if user.role is not UserRole.MARKETING:
         return False

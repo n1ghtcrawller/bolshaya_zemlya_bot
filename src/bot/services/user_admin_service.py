@@ -12,10 +12,10 @@ log = get_logger(__name__)
 
 
 class UserAdminService:
-    """Управление пользователями для роли Маркетинг/Админ.
+    """Управление пользователями для роли Маркетинг / HeadOfMarketing / Admin.
 
-    При смене роли инвалидирует Redis-кэш, чтобы новая роль применилась с первого же
-    апдейта (иначе нужно ждать ROLE_CACHE_TTL).
+    При смене или удалении инвалидирует Redis-кэш, чтобы изменение применилось
+    с первого же апдейта (иначе нужно ждать ROLE_CACHE_TTL).
     """
 
     def __init__(self, session: AsyncSession, role_cache: RoleCache) -> None:
@@ -44,3 +44,32 @@ class UserAdminService:
             new=role.value,
         )
         return user
+
+    async def delete(
+        self, *, user_id: int, deleted_by: User
+    ) -> tuple[User | None, str | None]:
+        """Удаляет пользователя со всеми связанными данными (через CASCADE).
+
+        Возвращает (deleted_user, error). Возможные error:
+        - 'forbidden' — у инициатора нет роли ADMIN
+        - 'not_found' — пользователь не существует
+        - 'self_delete' — попытка удалить самого себя
+        """
+        if deleted_by.role is not UserRole.ADMIN:
+            return None, "forbidden"
+        target = await self._users.get_by_id(user_id)
+        if target is None:
+            return None, "not_found"
+        if target.id == deleted_by.id:
+            return target, "self_delete"
+
+        await self._role_cache.invalidate(target.telegram_id)
+        await self._session.delete(target)
+        await self._session.flush()
+        log.info(
+            "user_deleted",
+            user_id=target.id,
+            telegram_id=target.telegram_id,
+            deleted_by=deleted_by.id,
+        )
+        return target, None

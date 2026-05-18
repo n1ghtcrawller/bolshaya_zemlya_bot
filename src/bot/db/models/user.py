@@ -1,8 +1,8 @@
-from sqlalchemy import BigInteger, Boolean, Enum, String
+from sqlalchemy import BigInteger, Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from bot.core.enums import UserRole
-from bot.db.base import Base, TimestampMixin
+from bot.db.base import Base, TimestampMixin, lower_enum
 
 
 class User(Base, TimestampMixin):
@@ -13,7 +13,7 @@ class User(Base, TimestampMixin):
     username: Mapped[str | None] = mapped_column(String(64))
     full_name: Mapped[str] = mapped_column(String(256), nullable=False)
     role: Mapped[UserRole] = mapped_column(
-        Enum(UserRole, name="user_role", native_enum=False, length=32),
+        lower_enum(UserRole, name="user_role"),
         nullable=False,
         default=UserRole.CLIENT,
         index=True,
