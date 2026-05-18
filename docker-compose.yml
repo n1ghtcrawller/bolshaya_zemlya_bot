@@ -59,9 +59,17 @@ services:
     # Внутри docker-сети hostname-ами выступают имена сервисов.
     # Эти значения перекрывают POSTGRES_HOST / REDIS_HOST из .env, в котором стоит localhost
     # (чтобы локальный запуск `python -m bot` тоже продолжал работать).
+    # N8N_BASE_URL указывает на n8n, развёрнутый ОТДЕЛЬНО на хост-машине
+    # (через host.docker.internal). Если n8n перенесёте в нашу docker-сеть —
+    # поменяйте значение на http://n8n:5678.
     environment:
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
+      N8N_BASE_URL: http://host.docker.internal:5678
+    # Для Linux: host.docker.internal не резолвится без явного маппинга.
+    # На Mac/Windows строчка ниже игнорируется (там host.docker.internal уже работает).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy

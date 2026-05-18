@@ -34,6 +34,26 @@
 
 Если используете другую LLM (Anthropic, Yandex GPT, локальная) — замените ноду OpenAI в импортированном workflow на нужную (Anthropic, HTTP Request с вашим эндпоинтом и т.п.) и обновите подключение к Respond-ноде.
 
+### Защита webhook-ов токеном (рекомендуется)
+
+По умолчанию webhook'и n8n **публичные** — любой, кто знает URL, может их дёрнуть. На stage/prod закрой их Header Auth:
+
+1. В каждом импортированном workflow открой ноду **Webhook** → **Authentication: Header Auth** → создай credential «N8N Webhook» со значениями:
+   - **Name** = `Authorization`
+   - **Value** = `Bearer my-secret-token` (любая строка, лучше длинная случайная)
+2. В `.env` бота:
+   ```env
+   N8N_AUTH_HEADER=Bearer my-secret-token
+   ```
+3. Бот автоматически будет слать заголовок `Authorization: Bearer my-secret-token` в каждом вызове.
+
+Альтернативно — Basic Auth: на стороне n8n укажи user/pass, в `.env` бота:
+```env
+N8N_AUTH_HEADER=Basic <base64 от "user:pass">
+```
+
+Если `N8N_AUTH_HEADER` пуст — заголовок не отправляется (для локальной разработки это удобно).
+
 ### Канал/чат публикации (для `content_publish`)
 
 Выпускающий канал, куда улетают опубликованные записи:

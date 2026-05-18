@@ -78,6 +78,16 @@ class N8nSettings(BaseSettings):
     webhook_broadcast: str = "/webhook/broadcast"
     webhook_content_publish: str = "/webhook/content-publish"
     request_timeout: int = 30
+    # Целиком кладётся в HTTP-заголовок Authorization, если задано.
+    # Примеры: "Bearer my-secret-token", "Basic base64(user:pass)".
+    auth_header: SecretStr | None = None
+
+    @field_validator("auth_header", mode="before")
+    @classmethod
+    def _empty_auth_as_none(cls, value):
+        if value in (None, "", b""):
+            return None
+        return value
 
 
 class PublisherSettings(BaseSettings):

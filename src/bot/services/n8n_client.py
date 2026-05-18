@@ -22,11 +22,20 @@ class N8nClient:
     def _url(self, path: str) -> str:
         return f"{self._settings.base_url.rstrip('/')}/{path.lstrip('/')}"
 
+    def _headers(self) -> dict[str, str]:
+        header = self._settings.auth_header
+        if header is None:
+            return {}
+        return {"Authorization": header.get_secret_value()}
+
     async def _post(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
         url = self._url(path)
         try:
             resp = await self._client.post(
-                url, json=payload, timeout=self._settings.request_timeout
+                url,
+                json=payload,
+                headers=self._headers(),
+                timeout=self._settings.request_timeout,
             )
             resp.raise_for_status()
         except httpx.HTTPError as exc:
