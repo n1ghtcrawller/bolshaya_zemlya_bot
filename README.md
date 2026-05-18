@@ -34,25 +34,38 @@ PostgreSQL (модели SQLAlchemy + alembic)        src/bot/db/models/
 
 ## Быстрый старт
 
+### Вариант A: всё в Docker (одна команда)
+
 ```powershell
-# 1. Виртуальное окружение и зависимости
+copy .env.example .env
+# отредактируйте BOT_TOKEN
+docker compose up -d --build
+```
+
+Поднимаются три контейнера: `bz_postgres`, `bz_redis`, `bz_bot`. Бот ждёт healthcheck-и БД и Redis, **автоматически применяет alembic-миграции** и стартует polling. Логи:
+
+```powershell
+docker compose logs -f bot
+```
+
+### Вариант B: бот локально, инфраструктура в Docker
+
+Удобно при активной разработке (быстрый рестарт, дебаг в IDE).
+
+```powershell
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -e .
 
-# 2. Конфиг
 copy .env.example .env
 # отредактируйте BOT_TOKEN
 
-# 3. PostgreSQL + Redis локально
-docker compose up -d
-
-# 4. Миграции
+docker compose up -d postgres redis    # только инфраструктура
 alembic upgrade head
-
-# 5. Запуск
 python -m bot
 ```
+
+`.env.example` ориентирован на этот сценарий: `POSTGRES_HOST=localhost`, `REDIS_HOST=localhost`. В режиме A эти переменные **переопределяются** в compose на имена сервисов `postgres`/`redis`.
 
 ## Роли и функционал
 

@@ -31,3 +31,21 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  bot:
+    build: .
+    container_name: bz_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    # Внутри docker-сети hostname-ами выступают имена сервисов.
+    # Эти значения перекрывают POSTGRES_HOST / REDIS_HOST из .env, в котором стоит localhost
+    # (чтобы локальный запуск `python -m bot` тоже продолжал работать).
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
