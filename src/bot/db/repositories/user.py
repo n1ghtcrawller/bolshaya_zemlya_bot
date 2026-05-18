@@ -47,6 +47,14 @@ class UserRepository:
             stmt = stmt.where(User.role == role)
         return (await self._session.scalars(stmt)).all()
 
+    async def has_role(self, role: UserRole) -> bool:
+        stmt = (
+            select(func.count())
+            .select_from(User)
+            .where(User.role == role, User.is_active.is_(True))
+        )
+        return int(await self._session.scalar(stmt) or 0) > 0
+
     async def create(
         self,
         *,

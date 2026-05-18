@@ -105,6 +105,63 @@ def requests_list_kb(request_ids: list[int]) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
+CB_FIND_REGION = "client:dir:region"
+CB_FIND_DEALER = "client:dir:dealer"
+CB_DEALER_REQUEST = "client:dir:dealer:request"
+CB_DEALER_CALLBACK = "client:dir:dealer:callback"
+
+
+def find_dealer_regions_kb(region_tokens: list[tuple[str, str]]) -> InlineKeyboardMarkup:
+    """region_tokens — список (название, token) ровно как в `regions_kb` у Sales."""
+    rows = [
+        [
+            InlineKeyboardButton(text=name, callback_data=f"{CB_FIND_REGION}:{token}")
+        ]
+        for name, token in region_tokens
+    ]
+    rows.append(
+        [InlineKeyboardButton(text="◀️ В меню", callback_data="client:back_to_menu")]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def find_dealer_list_kb(dealers: list[tuple[int, str]]) -> InlineKeyboardMarkup:
+    rows = [
+        [
+            InlineKeyboardButton(
+                text=name, callback_data=f"{CB_FIND_DEALER}:{dealer_id}"
+            )
+        ]
+        for dealer_id, name in dealers
+    ]
+    rows.append(
+        [InlineKeyboardButton(text="◀️ В меню", callback_data="client:back_to_menu")]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def find_dealer_card_kb(*, dealer_id: int, tg_url: str | None) -> InlineKeyboardMarkup:
+    rows: list[list[InlineKeyboardButton]] = []
+    if tg_url is not None:
+        rows.append([InlineKeyboardButton(text="💬 Написать в TG", url=tg_url)])
+    rows.append(
+        [
+            InlineKeyboardButton(
+                text="📝 Оставить заявку",
+                callback_data=f"{CB_DEALER_REQUEST}:{dealer_id}",
+            ),
+            InlineKeyboardButton(
+                text="📞 Заказать звонок",
+                callback_data=f"{CB_DEALER_CALLBACK}:{dealer_id}",
+            ),
+        ]
+    )
+    rows.append(
+        [InlineKeyboardButton(text="◀️ В меню", callback_data="client:back_to_menu")]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
 def service_issue_types_kb() -> InlineKeyboardMarkup:
     from bot.api.texts import SERVICE_ISSUE_LABELS
 

@@ -6,12 +6,11 @@ from bot.api.keyboards.sales import (
     CB_DIRECTORY_REGION,
     SalesMenuCallback,
     back_to_menu,
+    dealers_kb,
     region_token,
     regions_kb,
 )
 from bot.api.texts import (
-    SALES_DEALER_CARD,
-    SALES_DEALER_CARD_NO_USERNAME,
     SALES_FIND_DEALER_HEADER,
     SALES_FIND_DEALER_NO_REGIONS,
 )
@@ -55,15 +54,13 @@ async def show_region_dealers(call: CallbackQuery, session: AsyncSession) -> Non
             reply_markup=back_to_menu(),
         )
         return
+    options: list[tuple[int, str]] = []
     for user, profile in dealers:
-        text = SALES_DEALER_CARD.format(
-            full_name=user.full_name,
-            company=(profile.company if profile else None) or "—",
-            region=region,
-            address=(profile.address if profile else None) or "—",
-            phone=(profile.phone if profile else None) or "—",
-            username=user.username or SALES_DEALER_CARD_NO_USERNAME,
-            description=(profile.description if profile else None) or "",
-        )
-        await call.message.answer(text.rstrip())
-    await call.message.answer("Выбрать другой регион:", reply_markup=back_to_menu())
+        label = user.full_name
+        if profile and profile.company:
+            label = f"{user.full_name} · {profile.company}"
+        options.append((user.id, label))
+    await call.message.answer(
+        f"📍 {region} — выберите диллера:",
+        reply_markup=dealers_kb(options, lead_id=None),
+    )

@@ -48,3 +48,6 @@ class N8nClient:
 
     async def broadcast(self, payload: dict[str, Any]) -> dict[str, Any]:
         return await self._post(self._settings.webhook_broadcast, payload)
+
+    async def content_publish(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return await self._post(self._settings.webhook_content_publish, payload)

@@ -8,7 +8,6 @@ GREETING_RETURNING = "С возвращением, {name}! Выбери разд
 
 # Client menu
 CLIENT_MENU_HEADER = "🟢 Главное меню"
-CLIENT_MENU_HINT = "Раздел в разработке — скоро будет доступно."
 
 # Profile
 PROFILE_HEADER = "👤 Профиль"
@@ -60,6 +59,7 @@ STATUS_LABELS = {
     "new": "🆕 новая",
     "in_progress": "⚙️ в работе",
     "transferred_to_dealer": "📨 передана диллеру",
+    "kept_by_sales": "🔒 оставлена у sales",
     "done": "✅ выполнена",
     "rejected": "❌ отклонена",
 }
@@ -106,7 +106,8 @@ DEALER_PROFILE_TEMPLATE = (
     "Компания: {company}\n"
     "Регион: {region}\n"
     "Адрес: {address}\n"
-    "Телефон: {phone}\n\n"
+    "Телефон: {phone}\n"
+    "Специализация: {specialization}\n\n"
     "О себе:\n{description}"
 )
 DEALER_PROFILE_EMPTY_VALUE = "—"
@@ -116,6 +117,9 @@ DEALER_PROFILE_ASK_COMPANY = "Введите название компании �
 DEALER_PROFILE_ASK_REGION = "Введите регион работы или отправьте «-» чтобы очистить."
 DEALER_PROFILE_ASK_ADDRESS = "Введите адрес офиса/точки или отправьте «-» чтобы очистить."
 DEALER_PROFILE_ASK_DESCRIPTION = "Введите описание (о себе/о компании) или отправьте «-» чтобы очистить."
+DEALER_PROFILE_ASK_SPECIALIZATION = (
+    "Опишите специализацию (продукты/категории техники, отрасли) или «-» чтобы очистить."
+)
 DEALER_PROFILE_FIELD_SAVED = "Поле сохранено."
 
 MATERIAL_CATEGORY_LABELS = {
@@ -162,15 +166,59 @@ SALES_FIND_DEALER_NO_REGIONS = (
     "Дилеры пока не заполнили регион в профиле — справочник пуст."
 )
 SALES_DEALER_CARD = (
-    "📍 {full_name}\n"
+    "📍 <b>{full_name}</b>\n"
     "Компания: {company}\n"
     "Регион: {region}\n"
     "Адрес: {address}\n"
     "Телефон: {phone}\n"
-    "Telegram: @{username}\n\n"
-    "{description}"
+    "Telegram: @{username}\n"
+    "Статус: {status}\n\n"
+    "<b>Специализация</b>\n{specialization}\n\n"
+    "<b>О компании</b>\n{description}"
 )
 SALES_DEALER_CARD_NO_USERNAME = "—"
+SALES_DEALER_CARD_HEADER_FOR_LEAD = "📨 Передача лида #{lead_id} — карточка диллера:"
+SALES_DEALER_CARD_HEADER_DIRECTORY = "📍 Карточка диллера:"
+SALES_DEALER_STATUS_ACTIVE = "✅ активен"
+SALES_DEALER_STATUS_INACTIVE = "⛔ не активен"
+
+SALES_LEAD_KEPT = "🔒 Лид #{id} оставлен у вас. Статус: kept_by_sales."
+SALES_LEAD_APPROVAL_REQUESTED = (
+    "👔 Запрос #{id} на согласование передачи лида #{lead_id} отправлен руководителю."
+)
+SALES_LEAD_APPROVAL_DUPLICATE = (
+    "По этому лиду уже есть открытый запрос на согласование. Дождитесь решения руководителя."
+)
+
+# Head of Sales
+HOS_MENU_HEADER = "🔵 Кабинет HeadOfSales"
+HOS_QUEUE_BUTTON = "👔 Очередь согласований"
+HOS_QUEUE_HEADER = "👔 Согласования передач: {total}"
+HOS_QUEUE_EMPTY = "Запросов на согласование пока нет."
+HOS_QUEUE_LINE = (
+    "#{id} · лид #{lead_id} · от sales #{sales_id} → диллеру #{dealer_id}"
+)
+HOS_APPROVAL_DETAILS = (
+    "👔 Запрос #{id}\n"
+    "Создан: {created_at:%d.%m.%Y %H:%M}\n"
+    "Лид: #{lead_id} ({contact_name} · {contact_phone})\n"
+    "Sales: #{sales_id}\n"
+    "Диллер: #{dealer_id}\n\n"
+    "Комментарий к лиду:\n{lead_comment}"
+)
+HOS_APPROVAL_NOT_FOUND = "Запрос не найден или уже обработан."
+HOS_APPROVAL_DONE = (
+    "✅ Запрос #{id} одобрен. Лид #{lead_id} передан диллеру."
+)
+HOS_APPROVAL_REJECTED = (
+    "❌ Запрос #{id} отклонён. Лид остаётся у sales."
+)
+HOS_APPROVAL_ALREADY_DECIDED = "По этому запросу уже принято решение."
+SALES_DEALER_NOT_FOUND = "Диллер не найден или больше не активен."
+SALES_DEALER_NO_TG = (
+    "У диллера не указан @username — прямая ссылка в Telegram недоступна. "
+    "Свяжитесь по телефону."
+)
 
 SALES_ASSISTANT_HEADER = (
     "🤖 ИИ-помощник Sales\n\n"
@@ -196,6 +244,20 @@ MKT_DASHBOARD_TEMPLATE = (
 MKT_DASHBOARD_EMPTY_USERS = "Пока нет пользователей."
 MKT_DASHBOARD_EMPTY_LEADS = "Пока нет лидов."
 
+MKT_DASHBOARD_MENU = "📊 Дашборд — выберите раздел:"
+MKT_DASHBOARD_DEALERS_HEADER = "📍 Топ дилеров (по числу назначенных лидов): {total}"
+MKT_DASHBOARD_DEALERS_EMPTY = "Лидов, назначенных на диллеров, пока нет."
+MKT_DASHBOARD_DEALER_LINE = (
+    "#{id} {full_name}{company_suffix}\n"
+    "   всего: {total} · ⚙️ {in_progress} · ✅ {done} · ❌ {rejected} · 📨 {transferred}"
+)
+MKT_DASHBOARD_PRODUCTS_HEADER = "📦 Топ продуктов (по числу заявок): {total}"
+MKT_DASHBOARD_PRODUCTS_EMPTY = (
+    "Заявок с привязкой к товарам пока нет. Связь появляется автоматически, когда "
+    "клиент создаёт заявку из карточки товара в каталоге."
+)
+MKT_DASHBOARD_PRODUCT_LINE = "#{id} {name} · {category} — {total} заявок"
+
 MKT_USERS_PICK_ROLE = "Выберите роль для просмотра пользователей:"
 MKT_USERS_LIST_HEADER = "{role}: всего {total}"
 MKT_USER_CARD = (
@@ -212,7 +274,9 @@ ROLE_LABELS = {
     "client": "Клиент",
     "dealer": "Диллер",
     "sales": "Sales",
+    "head_of_sales": "Head of Sales",
     "marketing": "Маркетинг",
+    "head_of_marketing": "Head of Marketing",
 }
 
 MKT_MATERIALS_PICK_CATEGORY = "Выберите категорию для нового материала:"
@@ -265,10 +329,37 @@ CONTENT_TYPE_LABELS = {
 }
 CONTENT_STATUS_LABELS = {
     "draft": "✍️ черновик",
+    "pending_approval": "🛡 на согласовании",
+    "approved": "✅ согласовано",
+    "rejected": "❌ отклонено",
     "scheduled": "⏰ запланирована",
     "published": "📢 опубликована",
     "archived": "🗄 в архиве",
 }
+
+MKT_CONTENT_ASK_MEDIA = (
+    "Прикрепите медиа (фото/видео/документ/GIF) или отправьте «-» чтобы пропустить."
+)
+MKT_CONTENT_PICK_SUBMIT = (
+    "Готово! Сохранить как черновик или сразу отправить на согласование коллегам?"
+)
+MKT_CONTENT_NOT_FOUND = "Запись не найдена."
+MKT_CONTENT_STATUS_UPDATED = "Статус записи #{id} обновлён: {status}."
+
+MKT_CONTENT_PENDING_EMPTY = "На согласовании сейчас нет записей."
+MKT_CONTENT_PENDING_HEADER = "🛡 Контент на согласовании: {total}"
+MKT_CONTENT_PENDING_LINE = (
+    "#{id} · {type} · {created_at:%d.%m.%Y %H:%M}\n   {title}"
+)
+MKT_CONTENT_CARD = (
+    "📝 Запись #{id}\n"
+    "Тип: {type}\n"
+    "Статус: {status}\n"
+    "Регион: {region}\n"
+    "Дата публикации: {scheduled_at}\n"
+    "Медиа: {media}\n\n"
+    "<b>{title}</b>\n{body}"
+)
 
 MKT_EXPO_LIST_HEADER = "🎪 Ближайшие выставки:"
 MKT_EXPO_LIST_EMPTY = "Запланированных выставок пока нет."
@@ -316,6 +407,25 @@ CATALOG_PRODUCT_TEMPLATE = (
     "\n<b>Характеристики</b>\n{specs}"
 )
 CATALOG_REQUEST_NOTE_PREFIX = "Интересует товар «{name}» (#{id})."
+
+# Client: find dealer
+CLIENT_FIND_DEALER_HEADER = "📍 Найти диллера\nВыберите регион:"
+CLIENT_FIND_DEALER_NO_REGIONS = (
+    "Дилеры пока не заполнили регион в профиле — справочник пуст."
+)
+CLIENT_FIND_DEALER_REGION_EMPTY = "В этом регионе пока нет активных дилеров."
+CLIENT_FIND_DEALER_REGION_HEADER = "📍 {region} — выберите диллера:"
+CLIENT_DEALER_NOT_FOUND = "Диллер не найден."
+CLIENT_DEALER_CARD = (
+    "📍 <b>{full_name}</b>\n"
+    "Компания: {company}\n"
+    "Регион: {region}\n"
+    "Адрес: {address}\n"
+    "Телефон: {phone}\n"
+    "\n<b>Специализация</b>\n{specialization}\n"
+    "\n<b>О компании</b>\n{description}"
+)
+CLIENT_DEALER_REQUEST_NOTE = "Через карточку диллера: {full_name} (#{dealer_id})."
 
 # Catalog admin (Marketing)
 MKT_CATALOG_MENU = "📚 Каталог продукции"

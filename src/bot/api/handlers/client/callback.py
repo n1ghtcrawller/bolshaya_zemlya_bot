@@ -66,11 +66,16 @@ async def note(
     note_text = None if raw == "-" else raw
     data = await state.get_data()
     phone = data.get("phone", "")
+    prefix = data.get("comment_prefix")
+    parts = ["📞 Запрос обратного звонка"]
+    if prefix:
+        parts.append(prefix)
+    parts.append(note_text or "без уточнений")
     try:
         payload = ClientRequestCreate(
             contact_name=app_user.full_name,
             contact_phone=phone,
-            comment=f"📞 Запрос обратного звонка\n{note_text or 'без уточнений'}",
+            comment="\n".join(parts),
             lead_type=LeadType.CALLBACK,
         )
     except ValidationError:

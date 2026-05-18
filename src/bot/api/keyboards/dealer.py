@@ -293,9 +293,13 @@ def profile_edit_kb() -> InlineKeyboardMarkup:
             ],
             [
                 InlineKeyboardButton(
+                    text="✏️ Специализация",
+                    callback_data=f"{CB_PROFILE_EDIT}:specialization",
+                ),
+                InlineKeyboardButton(
                     text="✏️ О компании",
                     callback_data=f"{CB_PROFILE_EDIT}:description",
-                )
+                ),
             ],
             [
                 InlineKeyboardButton(

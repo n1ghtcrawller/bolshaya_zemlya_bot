@@ -36,5 +36,8 @@ class ClientRequest(Base, TimestampMixin):
     assigned_dealer_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL")
     )
+    product_id: Mapped[int | None] = mapped_column(
+        ForeignKey("products.id", ondelete="SET NULL"), index=True
+    )
 
     user: Mapped[User] = relationship(foreign_keys=[user_id], lazy="joined")

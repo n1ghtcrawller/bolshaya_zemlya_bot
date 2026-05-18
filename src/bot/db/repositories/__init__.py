@@ -5,6 +5,7 @@ from bot.db.repositories.content_item import ContentItemRepository
 from bot.db.repositories.dealer_directory import DealerDirectoryRepository
 from bot.db.repositories.dealer_profile import DealerProfileRepository
 from bot.db.repositories.expo import ExpoRepository
+from bot.db.repositories.lead_approval import LeadApprovalRepository
 from bot.db.repositories.product import ProductRepository
 from bot.db.repositories.product_category import ProductCategoryRepository
 from bot.db.repositories.sales_material import SalesMaterialRepository
@@ -19,6 +20,7 @@ __all__ = [
     "DealerDirectoryRepository",
     "DealerProfileRepository",
     "ExpoRepository",
+    "LeadApprovalRepository",
     "ProductCategoryRepository",
     "ProductRepository",
     "SalesMaterialRepository",

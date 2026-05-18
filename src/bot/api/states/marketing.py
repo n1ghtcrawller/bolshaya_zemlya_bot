@@ -19,6 +19,8 @@ class ContentCreateSG(StatesGroup):
     waiting_body = State()
     waiting_region = State()
     waiting_scheduled = State()
+    waiting_media = State()
+    waiting_submit_choice = State()
 
 
 class ExpoCreateSG(StatesGroup):

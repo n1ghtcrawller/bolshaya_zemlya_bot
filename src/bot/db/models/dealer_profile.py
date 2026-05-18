@@ -18,5 +18,6 @@ class DealerProfile(Base, TimestampMixin):
     region: Mapped[str | None] = mapped_column(String(128))
     address: Mapped[str | None] = mapped_column(String(512))
     description: Mapped[str | None] = mapped_column(Text)
+    specialization: Mapped[str | None] = mapped_column(Text)
 
     user: Mapped[User] = relationship(lazy="joined")

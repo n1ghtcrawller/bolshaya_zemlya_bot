@@ -1,0 +1,192 @@
+{
+  "name": "Bolshaya Zemlya — Content Publish",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "content-publish",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-content-publish",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 400],
+      "webhookId": "content-publish"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "caption",
+              "name": "caption",
+              "value": "=<b>{{ $json.body.title }}</b>{{ $json.body.body ? '\\n\\n' + $json.body.body : '' }}{{ $json.body.region ? '\\n\\n📍 ' + $json.body.region : '' }}",
+              "type": "string"
+            },
+            {
+              "id": "channel_id",
+              "name": "channel_id",
+              "value": "={{ $vars.PUBLISH_CHANNEL_ID }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-caption",
+      "name": "Build Caption",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [440, 400]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {"conditions": {"options": {"caseSensitive": true, "leftValue": "", "typeValidation": "loose"}, "conditions": [{"id": "c1", "leftValue": "={{ $('Webhook').item.json.body.file_type }}", "rightValue": "photo", "operator": {"type": "string", "operation": "equals"}}], "combinator": "and"}, "renameOutput": true, "outputKey": "photo"},
+            {"conditions": {"options": {"caseSensitive": true, "leftValue": "", "typeValidation": "loose"}, "conditions": [{"id": "c2", "leftValue": "={{ $('Webhook').item.json.body.file_type }}", "rightValue": "video", "operator": {"type": "string", "operation": "equals"}}], "combinator": "and"}, "renameOutput": true, "outputKey": "video"},
+            {"conditions": {"options": {"caseSensitive": true, "leftValue": "", "typeValidation": "loose"}, "conditions": [{"id": "c3", "leftValue": "={{ $('Webhook').item.json.body.file_type }}", "rightValue": "document", "operator": {"type": "string", "operation": "equals"}}], "combinator": "and"}, "renameOutput": true, "outputKey": "document"},
+            {"conditions": {"options": {"caseSensitive": true, "leftValue": "", "typeValidation": "loose"}, "conditions": [{"id": "c4", "leftValue": "={{ $('Webhook').item.json.body.file_type }}", "rightValue": "animation", "operator": {"type": "string", "operation": "equals"}}], "combinator": "and"}, "renameOutput": true, "outputKey": "animation"}
+          ]
+        },
+        "options": {"fallbackOutput": "extra", "renameFallbackOutput": "text"}
+      },
+      "id": "switch-content-type",
+      "name": "Switch by file_type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.channel_id }}",
+        "text": "={{ $json.caption }}",
+        "additionalFields": {"parse_mode": "HTML"}
+      },
+      "id": "tg-channel-message",
+      "name": "Telegram sendMessage",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [960, 100],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_TELEGRAM_CREDENTIAL_ID",
+          "name": "Bolshaya Zemlya Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $json.channel_id }}",
+        "binaryData": false,
+        "fileId": "={{ $('Webhook').item.json.body.telegram_file_id }}",
+        "additionalFields": {"caption": "={{ $json.caption }}", "parse_mode": "HTML"}
+      },
+      "id": "tg-channel-photo",
+      "name": "Telegram sendPhoto",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [960, 280],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_TELEGRAM_CREDENTIAL_ID",
+          "name": "Bolshaya Zemlya Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "={{ $json.channel_id }}",
+        "binaryData": false,
+        "fileId": "={{ $('Webhook').item.json.body.telegram_file_id }}",
+        "additionalFields": {"caption": "={{ $json.caption }}", "parse_mode": "HTML"}
+      },
+      "id": "tg-channel-video",
+      "name": "Telegram sendVideo",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [960, 460],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_TELEGRAM_CREDENTIAL_ID",
+          "name": "Bolshaya Zemlya Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $json.channel_id }}",
+        "binaryData": false,
+        "fileId": "={{ $('Webhook').item.json.body.telegram_file_id }}",
+        "additionalFields": {"caption": "={{ $json.caption }}", "parse_mode": "HTML"}
+      },
+      "id": "tg-channel-document",
+      "name": "Telegram sendDocument",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [960, 640],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_TELEGRAM_CREDENTIAL_ID",
+          "name": "Bolshaya Zemlya Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAnimation",
+        "chatId": "={{ $json.channel_id }}",
+        "binaryData": false,
+        "fileId": "={{ $('Webhook').item.json.body.telegram_file_id }}",
+        "additionalFields": {"caption": "={{ $json.caption }}", "parse_mode": "HTML"}
+      },
+      "id": "tg-channel-animation",
+      "name": "Telegram sendAnimation",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [960, 820],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_TELEGRAM_CREDENTIAL_ID",
+          "name": "Bolshaya Zemlya Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: 'published', content_id: $('Webhook').item.json.body.content_id } }}"
+      },
+      "id": "respond-publish",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1260, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {"main": [[{"node": "Build Caption", "type": "main", "index": 0}]]},
+    "Build Caption": {"main": [[{"node": "Switch by file_type", "type": "main", "index": 0}]]},
+    "Switch by file_type": {
+      "main": [
+        [{"node": "Telegram sendPhoto", "type": "main", "index": 0}],
+        [{"node": "Telegram sendVideo", "type": "main", "index": 0}],
+        [{"node": "Telegram sendDocument", "type": "main", "index": 0}],
+        [{"node": "Telegram sendAnimation", "type": "main", "index": 0}],
+        [{"node": "Telegram sendMessage", "type": "main", "index": 0}]
+      ]
+    },
+    "Telegram sendMessage": {"main": [[{"node": "Respond", "type": "main", "index": 0}]]},
+    "Telegram sendPhoto": {"main": [[{"node": "Respond", "type": "main", "index": 0}]]},
+    "Telegram sendVideo": {"main": [[{"node": "Respond", "type": "main", "index": 0}]]},
+    "Telegram sendDocument": {"main": [[{"node": "Respond", "type": "main", "index": 0}]]},
+    "Telegram sendAnimation": {"main": [[{"node": "Respond", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "pinData": {}
+}

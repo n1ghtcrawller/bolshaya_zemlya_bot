@@ -77,3 +77,19 @@ class SalesLeadService:
         else:
             await self._requests.update_status(request, RequestStatus.REJECTED)
         return request
+
+    async def keep(
+        self, sales_user_id: int, request_id: int
+    ) -> ClientRequest | None:
+        """Sales решает оставить лид у себя — `kept_by_sales`. Дилер не назначается."""
+        request = await self._requests.get_by_id(request_id)
+        if request is None or request.assigned_sales_id != sales_user_id:
+            return None
+        request = await self._requests.update_status(request, RequestStatus.KEPT_BY_SALES)
+        log.info("sales_lead_kept", request_id=request.id, sales_id=sales_user_id)
+        return request
+
+    async def list_kept(self, sales_user_id: int) -> Sequence[ClientRequest]:
+        return await self._requests.list_by_sales(
+            sales_user_id, statuses=[RequestStatus.KEPT_BY_SALES]
+        )

@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.db.models.dealer_profile import DealerProfile
 
-ALLOWED_FIELDS = frozenset({"phone", "company", "region", "address", "description"})
+ALLOWED_FIELDS = frozenset(
+    {"phone", "company", "region", "address", "description", "specialization"}
+)
 
 
 class DealerProfileRepository:

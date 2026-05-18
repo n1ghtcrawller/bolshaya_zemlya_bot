@@ -110,6 +110,7 @@ async def confirm_request(
             contact_name=data["contact_name"],
             contact_phone=data["contact_phone"],
             comment=data.get("comment"),
+            product_id=data.get("product_id"),
         )
     except ValidationError:
         await call.message.answer(REQUEST_VALIDATION_FAILED, reply_markup=back_to_menu())

@@ -1,6 +1,8 @@
+from bot.services.approval_policy import can_approve_marketing
 from bot.services.broadcast_service import BroadcastService
 from bot.services.catalog_admin_service import CatalogAdminService
 from bot.services.catalog_service import CatalogService
+from bot.services.content_publisher import publish_due_content
 from bot.services.content_service import ContentService
 from bot.services.dashboard_service import DashboardService
 from bot.services.dealer_directory_service import DealerDirectoryService
@@ -8,6 +10,7 @@ from bot.services.dealer_lead_service import DealerLeadService
 from bot.services.dealer_service import DealerService
 from bot.services.expo_assistant_service import ExpoAssistantService
 from bot.services.expo_service import ExpoService
+from bot.services.lead_approval_service import LeadApprovalService
 from bot.services.material_moderation_service import MaterialModerationService
 from bot.services.material_upload_service import MaterialUploadService
 from bot.services.n8n_client import N8nClient
@@ -30,6 +33,7 @@ __all__ = [
     "DealerService",
     "ExpoAssistantService",
     "ExpoService",
+    "LeadApprovalService",
     "MaterialModerationService",
     "MaterialUploadService",
     "N8nClient",
@@ -40,4 +44,5 @@ __all__ = [
     "ServiceRequestService",
     "UserAdminService",
     "UserService",
+    "publish_due_content",
 ]

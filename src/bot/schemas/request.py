@@ -10,6 +10,7 @@ class ClientRequestCreate(BaseModel):
     contact_phone: str = Field(min_length=5, max_length=32)
     comment: str | None = Field(default=None, max_length=2000)
     lead_type: LeadType = LeadType.REQUEST
+    product_id: int | None = None
 
     @field_validator("contact_phone")
     @classmethod

@@ -6,12 +6,13 @@ from aiogram.types import Message
 from bot.api.keyboards.client import client_main_menu
 from bot.api.keyboards.dealer import dealer_main_menu
 from bot.api.keyboards.marketing import marketing_main_menu
-from bot.api.keyboards.sales import sales_main_menu
+from bot.api.keyboards.sales import head_of_sales_main_menu, sales_main_menu
 from bot.api.texts import (
     CLIENT_MENU_HEADER,
     DEALER_MENU_HEADER,
     GREETING_NEW,
     GREETING_RETURNING,
+    HOS_MENU_HEADER,
     MKT_MENU_HEADER,
     SALES_MENU_HEADER,
 )
@@ -39,7 +40,13 @@ async def _send_role_menu(message: Message, role: UserRole) -> None:
     if role is UserRole.SALES:
         await message.answer(SALES_MENU_HEADER, reply_markup=sales_main_menu())
         return
+    if role is UserRole.HEAD_OF_SALES:
+        await message.answer(HOS_MENU_HEADER, reply_markup=head_of_sales_main_menu())
+        return
     if role is UserRole.MARKETING:
+        await message.answer(MKT_MENU_HEADER, reply_markup=marketing_main_menu())
+        return
+    if role is UserRole.HEAD_OF_MARKETING:
         await message.answer(MKT_MENU_HEADER, reply_markup=marketing_main_menu())
         return
 

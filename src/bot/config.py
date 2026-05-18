@@ -63,14 +63,22 @@ class N8nSettings(BaseSettings):
     webhook_sales_assistant: str = "/webhook/sales-assistant"
     webhook_expo_assistant: str = "/webhook/expo-assistant"
     webhook_broadcast: str = "/webhook/broadcast"
+    webhook_content_publish: str = "/webhook/content-publish"
     request_timeout: int = 30
+
+
+class PublisherSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="PUBLISHER_", env_file=".env", extra="ignore")
+
+    enabled: bool = True
+    interval_seconds: int = 60
 
 
 class LoggingSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="LOG_", env_file=".env", extra="ignore")
 
     level: str = "INFO"
-    json: bool = False
+    as_json: bool = Field(default=False, alias="LOG_JSON")
 
 
 class Settings:
@@ -80,6 +88,7 @@ class Settings:
         self.redis = RedisSettings()
         self.cache = CacheSettings()
         self.n8n = N8nSettings()
+        self.publisher = PublisherSettings()
         self.logging = LoggingSettings()
 
 

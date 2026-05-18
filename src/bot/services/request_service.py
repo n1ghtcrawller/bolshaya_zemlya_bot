@@ -24,6 +24,7 @@ class RequestService:
             contact_phone=payload.contact_phone,
             comment=payload.comment,
             lead_type=payload.lead_type,
+            product_id=payload.product_id,
         )
         # Кэшируем телефон в профиле клиента — пригодится при следующих заявках.
         await self._profiles.upsert(user_id=user_id, phone=payload.contact_phone)

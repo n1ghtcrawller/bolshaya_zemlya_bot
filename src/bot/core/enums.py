@@ -5,13 +5,16 @@ class UserRole(StrEnum):
     CLIENT = "client"
     DEALER = "dealer"
     SALES = "sales"
+    HEAD_OF_SALES = "head_of_sales"
     MARKETING = "marketing"
+    HEAD_OF_MARKETING = "head_of_marketing"
 
 
 class RequestStatus(StrEnum):
     NEW = "new"
     IN_PROGRESS = "in_progress"
     TRANSFERRED_TO_DEALER = "transferred_to_dealer"
+    KEPT_BY_SALES = "kept_by_sales"
     DONE = "done"
     REJECTED = "rejected"
 
@@ -40,6 +43,9 @@ class ContentType(StrEnum):
 
 class ContentStatus(StrEnum):
     DRAFT = "draft"
+    PENDING_APPROVAL = "pending_approval"
+    APPROVED = "approved"
+    REJECTED = "rejected"
     SCHEDULED = "scheduled"
     PUBLISHED = "published"
     ARCHIVED = "archived"

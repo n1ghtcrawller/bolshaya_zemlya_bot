@@ -24,6 +24,10 @@ CB_MOD_VIEW = "mkt:mod:view"
 CB_MOD_APPROVE = "mkt:mod:approve"
 CB_MOD_REJECT = "mkt:mod:reject"
 
+CB_DASH_SUMMARY = "mkt:dash:summary"
+CB_DASH_DEALERS = "mkt:dash:dealers"
+CB_DASH_PRODUCTS = "mkt:dash:products"
+
 CB_USERS_ROLE = "mkt:users:role"
 CB_USER_VIEW = "mkt:user:view"
 CB_USER_SET_ROLE = "mkt:user:setrole"
@@ -38,6 +42,13 @@ CB_BROADCAST_CONFIRM = "mkt:bc:confirm"
 CB_CONTENT_TYPE = "mkt:ct:type"
 CB_CONTENT_NEW = "mkt:ct:new"
 CB_CONTENT_VIEW = "mkt:ct:view"
+CB_CONTENT_PENDING = "mkt:ct:pending"
+CB_CONTENT_SUBMIT_CHOICE = "mkt:ct:sub"
+CB_CONTENT_APPROVE = "mkt:ct:approve"
+CB_CONTENT_REJECT = "mkt:ct:reject"
+CB_CONTENT_PUBLISH = "mkt:ct:publish"
+CB_CONTENT_ARCHIVE = "mkt:ct:archive"
+CB_CONTENT_SUBMIT_NOW = "mkt:ct:submitnow"
 
 CB_EXPO_NEW = "mkt:expo:new"
 CB_EXPO_LIST = "mkt:expo:list"
@@ -160,6 +171,25 @@ def catalog_pick_category_kb(categories: list[tuple[int, str]]) -> InlineKeyboar
         [InlineKeyboardButton(text="◀️ В меню", callback_data=MktMenuCallback.BACK_TO_MENU)]
     )
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def dashboard_menu_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="📋 Сводка", callback_data=CB_DASH_SUMMARY),
+            ],
+            [
+                InlineKeyboardButton(text="📍 По диллерам", callback_data=CB_DASH_DEALERS),
+                InlineKeyboardButton(text="📦 По продуктам", callback_data=CB_DASH_PRODUCTS),
+            ],
+            [
+                InlineKeyboardButton(
+                    text="◀️ В меню", callback_data=MktMenuCallback.BACK_TO_MENU
+                )
+            ],
+        ]
+    )
 
 
 def back_to_menu() -> InlineKeyboardMarkup:
@@ -331,10 +361,101 @@ def content_types_kb(*, with_add: bool = True) -> InlineKeyboardMarkup:
         ]
         for ct in ContentType
     ]
+    rows.append(
+        [
+            InlineKeyboardButton(
+                text="🛡 На согласовании", callback_data=CB_CONTENT_PENDING
+            )
+        ]
+    )
     if with_add:
         rows.append(
             [InlineKeyboardButton(text="➕ Добавить запись", callback_data=CB_CONTENT_NEW)]
         )
+    rows.append(
+        [InlineKeyboardButton(text="◀️ В меню", callback_data=MktMenuCallback.BACK_TO_MENU)]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def content_submit_choice_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="📝 Черновик",
+                    callback_data=f"{CB_CONTENT_SUBMIT_CHOICE}:draft",
+                ),
+                InlineKeyboardButton(
+                    text="📤 На согласование",
+                    callback_data=f"{CB_CONTENT_SUBMIT_CHOICE}:submit",
+                ),
+            ]
+        ]
+    )
+
+
+def content_card_kb(item_id: int, status_value: str) -> InlineKeyboardMarkup:
+    rows: list[list[InlineKeyboardButton]] = []
+    if status_value == "draft":
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text="📤 На согласование",
+                    callback_data=f"{CB_CONTENT_SUBMIT_NOW}:{item_id}",
+                )
+            ]
+        )
+    elif status_value == "pending_approval":
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text="✅ Одобрить",
+                    callback_data=f"{CB_CONTENT_APPROVE}:{item_id}",
+                ),
+                InlineKeyboardButton(
+                    text="❌ Отклонить",
+                    callback_data=f"{CB_CONTENT_REJECT}:{item_id}",
+                ),
+            ]
+        )
+    elif status_value in {"approved", "scheduled"}:
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text="📢 Опубликовано",
+                    callback_data=f"{CB_CONTENT_PUBLISH}:{item_id}",
+                ),
+                InlineKeyboardButton(
+                    text="🗄 В архив",
+                    callback_data=f"{CB_CONTENT_ARCHIVE}:{item_id}",
+                ),
+            ]
+        )
+    elif status_value == "rejected":
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text="📤 Повторно на согласование",
+                    callback_data=f"{CB_CONTENT_SUBMIT_NOW}:{item_id}",
+                )
+            ]
+        )
+    rows.append(
+        [InlineKeyboardButton(text="◀️ В меню", callback_data=MktMenuCallback.BACK_TO_MENU)]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def content_list_kb(item_ids: list[int]) -> InlineKeyboardMarkup:
+    rows = [
+        [
+            InlineKeyboardButton(
+                text=f"Открыть #{i}", callback_data=f"{CB_CONTENT_VIEW}:{i}"
+            )
+        ]
+        for i in item_ids
+    ]
     rows.append(
         [InlineKeyboardButton(text="◀️ В меню", callback_data=MktMenuCallback.BACK_TO_MENU)]
     )

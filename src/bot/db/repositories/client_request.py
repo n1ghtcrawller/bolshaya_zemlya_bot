@@ -125,6 +125,7 @@ class ClientRequestRepository:
         contact_phone: str,
         comment: str | None,
         lead_type: LeadType = LeadType.REQUEST,
+        product_id: int | None = None,
     ) -> ClientRequest:
         request = ClientRequest(
             user_id=user_id,
@@ -133,6 +134,7 @@ class ClientRequestRepository:
             comment=comment,
             status=RequestStatus.NEW,
             lead_type=lead_type,
+            product_id=product_id,
         )
         self._session.add(request)
         await self._session.flush()

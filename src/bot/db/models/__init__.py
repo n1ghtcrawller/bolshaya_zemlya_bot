@@ -4,6 +4,7 @@ from bot.db.models.client_request import ClientRequest
 from bot.db.models.content_item import ContentItem
 from bot.db.models.dealer_profile import DealerProfile
 from bot.db.models.expo import Expo
+from bot.db.models.lead_approval import LeadApproval
 from bot.db.models.product import Product
 from bot.db.models.product_category import ProductCategory
 from bot.db.models.sales_material import SalesMaterial
@@ -17,6 +18,7 @@ __all__ = [
     "ContentItem",
     "DealerProfile",
     "Expo",
+    "LeadApproval",
     "Product",
     "ProductCategory",
     "SalesMaterial",

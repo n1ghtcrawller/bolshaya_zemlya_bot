@@ -129,7 +129,11 @@ async def start_product_request(
         return
     note = CATALOG_REQUEST_NOTE_PREFIX.format(name=product.name, id=product.id)
     await state.set_state(CreateRequestSG.name)
-    await state.update_data(prefill_name=app_user.full_name, comment_prefix=note)
+    await state.update_data(
+        prefill_name=app_user.full_name,
+        comment_prefix=note,
+        product_id=product.id,
+    )
     await call.message.answer(REQUEST_ASK_NAME, reply_markup=cancel_kb())
 
 

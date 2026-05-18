@@ -16,9 +16,9 @@ from bot.core.enums import UserRole
 
 def build_marketing_router() -> Router:
     router = Router(name="marketing")
-    mkt_only = RoleFilter(UserRole.MARKETING)
-    router.message.filter(mkt_only)
-    router.callback_query.filter(mkt_only)
+    mkt_or_head = RoleFilter(UserRole.MARKETING, UserRole.HEAD_OF_MARKETING)
+    router.message.filter(mkt_or_head)
+    router.callback_query.filter(mkt_or_head)
     router.include_router(menu_router)
     router.include_router(dashboard_router)
     router.include_router(users_router)

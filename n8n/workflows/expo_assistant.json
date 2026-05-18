@@ -1,0 +1,69 @@
+{
+  "name": "Bolshaya Zemlya — Expo Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "expo-assistant",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-expo-assistant",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "webhookId": "expo-assistant"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Ты — ИИ-помощник маркетолога по выставкам и мероприятиям в компании «Большая Земля» (с/х техника). Помогаешь планировать стенд, продукты на нём, активности, отвечаешь на вопросы по логистике мероприятий. На русском, кратко, по делу."
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.body.question }}\n\nКонтекст: {{ JSON.stringify($json.body.context || {}) }}"
+            }
+          ]
+        },
+        "simplify": true
+      },
+      "id": "openai-expo",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.5,
+      "position": [480, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { answer: $json.message.content } }}"
+      },
+      "id": "respond-expo",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [760, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {"main": [[{"node": "OpenAI", "type": "main", "index": 0}]]},
+    "OpenAI": {"main": [[{"node": "Respond", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "pinData": {}
+}

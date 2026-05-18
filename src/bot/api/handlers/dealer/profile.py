@@ -16,6 +16,7 @@ from bot.api.texts import (
     DEALER_PROFILE_ASK_DESCRIPTION,
     DEALER_PROFILE_ASK_PHONE,
     DEALER_PROFILE_ASK_REGION,
+    DEALER_PROFILE_ASK_SPECIALIZATION,
     DEALER_PROFILE_EDIT_HINT,
     DEALER_PROFILE_EMPTY_VALUE,
     DEALER_PROFILE_FIELD_SAVED,
@@ -32,6 +33,7 @@ FIELD_PROMPTS: dict[str, str] = {
     "region": DEALER_PROFILE_ASK_REGION,
     "address": DEALER_PROFILE_ASK_ADDRESS,
     "description": DEALER_PROFILE_ASK_DESCRIPTION,
+    "specialization": DEALER_PROFILE_ASK_SPECIALIZATION,
 }
 
 
@@ -52,6 +54,7 @@ async def show_profile(call: CallbackQuery, app_user: User, session: AsyncSessio
         region=fmt(profile.region if profile else None),
         address=fmt(profile.address if profile else None),
         phone=fmt(profile.phone if profile else None),
+        specialization=fmt(profile.specialization if profile else None),
         description=fmt(profile.description if profile else None),
     )
     await call.message.answer(text, reply_markup=profile_edit_kb())

@@ -2,10 +2,14 @@ from aiogram import F, Router
 from aiogram.types import CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from bot.api.handlers.sales._dealer_card import render_dealer_card
 from bot.api.keyboards.sales import (
+    CB_DIRECTORY_DEALER,
+    CB_LEAD_KEEP,
     CB_LEAD_REJECT,
+    CB_LEAD_REQUEST_APPROVAL,
     CB_LEAD_TAKE,
-    CB_LEAD_TRANSFER_DEALER,
+    CB_LEAD_TRANSFER_CONFIRM,
     CB_LEAD_TRANSFER_REGION,
     CB_LEAD_VIEW,
     SalesMenuCallback,
@@ -249,14 +253,38 @@ async def pick_dealer(call: CallbackQuery, app_user: User, session: AsyncSession
         options.append((user.id, label))
     await call.message.answer(
         SALES_LEAD_TRANSFER_PICK_DEALER.format(region=region),
-        reply_markup=dealers_kb(options, lead_id),
+        reply_markup=dealers_kb(options, lead_id=lead_id),
     )
 
 
-@leads_router.callback_query(F.data.startswith(f"{CB_LEAD_TRANSFER_DEALER}:"))
-async def transfer_to_dealer(
+@leads_router.callback_query(F.data.startswith(f"{CB_DIRECTORY_DEALER}:"))
+async def show_dealer_card(call: CallbackQuery, session: AsyncSession) -> None:
+    """Открытие карточки диллера. Если lead_id != 0 — в режиме передачи лида."""
+    await call.answer()
+    if call.message is None or call.data is None:
+        return
+    parts = call.data.split(":")
+    if len(parts) != 5:
+        return
+    lead_id = _parse_int(parts[-2])
+    dealer_id = _parse_int(parts[-1])
+    if dealer_id is None:
+        return
+    directory = DealerDirectoryService(session)
+    dealer = await directory.get_dealer(dealer_id)
+    await render_dealer_card(
+        call,
+        dealer=dealer,
+        lead_id=lead_id if lead_id else None,
+        session=session,
+    )
+
+
+@leads_router.callback_query(F.data.startswith(f"{CB_LEAD_TRANSFER_CONFIRM}:"))
+async def transfer_confirm(
     call: CallbackQuery, app_user: User, session: AsyncSession
 ) -> None:
+    """Подтверждение передачи лида диллеру из карточки диллера."""
     await call.answer()
     if call.message is None or call.data is None:
         return
@@ -278,6 +306,64 @@ async def transfer_to_dealer(
     await call.message.answer(
         SALES_LEAD_TRANSFER_DONE.format(id=lead.id, dealer_name=dealer_name),
         reply_markup=back_to_menu(),
+    )
+
+
+@leads_router.callback_query(F.data.startswith(f"{CB_LEAD_REQUEST_APPROVAL}:"))
+async def request_head_approval(
+    call: CallbackQuery, app_user: User, session: AsyncSession
+) -> None:
+    """Sales отправляет передачу лида диллеру на согласование HeadOfSales."""
+    from bot.api.texts import (
+        SALES_LEAD_APPROVAL_DUPLICATE,
+        SALES_LEAD_APPROVAL_REQUESTED,
+    )
+    from bot.services.lead_approval_service import LeadApprovalService
+
+    await call.answer()
+    if call.message is None or call.data is None:
+        return
+    parts = call.data.split(":")
+    if len(parts) != 5:
+        return
+    lead_id = _parse_int(parts[-2])
+    dealer_id = _parse_int(parts[-1])
+    if lead_id is None or dealer_id is None:
+        return
+    service = LeadApprovalService(session)
+    approval, error = await service.request(
+        sales_user_id=app_user.id, lead_id=lead_id, proposed_dealer_id=dealer_id
+    )
+    if error == "duplicate_pending":
+        await call.message.answer(SALES_LEAD_APPROVAL_DUPLICATE, reply_markup=back_to_menu())
+        return
+    if approval is None:
+        await call.message.answer(SALES_LEAD_TRANSFER_NOT_OWNER, reply_markup=back_to_menu())
+        return
+    await call.message.answer(
+        SALES_LEAD_APPROVAL_REQUESTED.format(id=approval.id, lead_id=lead_id),
+        reply_markup=back_to_menu(),
+    )
+
+
+@leads_router.callback_query(F.data.startswith(f"{CB_LEAD_KEEP}:"))
+async def keep_lead(call: CallbackQuery, app_user: User, session: AsyncSession) -> None:
+    """Sales решает оставить лид у себя (не передавать диллеру)."""
+    await call.answer()
+    if call.message is None or call.data is None:
+        return
+    lead_id = _parse_int(call.data.rsplit(":", 1)[-1])
+    if lead_id is None:
+        return
+    service = SalesLeadService(session)
+    lead = await service.keep(app_user.id, lead_id)
+    if lead is None:
+        await call.message.answer(SALES_LEAD_TRANSFER_NOT_OWNER, reply_markup=back_to_menu())
+        return
+    from bot.api.texts import SALES_LEAD_KEPT
+
+    await call.message.answer(
+        SALES_LEAD_KEPT.format(id=lead.id), reply_markup=back_to_menu()
     )
 
 

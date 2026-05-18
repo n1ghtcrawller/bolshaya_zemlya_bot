@@ -16,7 +16,7 @@ def configure_logging(settings: LoggingSettings) -> None:
         timestamper,
     ]
 
-    if settings.json:
+    if settings.as_json:
         renderer: structlog.types.Processor = structlog.processors.JSONRenderer()
     else:
         renderer = structlog.dev.ConsoleRenderer(colors=True)

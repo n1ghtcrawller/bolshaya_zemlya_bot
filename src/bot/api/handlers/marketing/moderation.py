@@ -89,39 +89,38 @@ async def view(call: CallbackQuery, session: AsyncSession) -> None:
 
 @moderation_router.callback_query(F.data.startswith(f"{CB_MOD_APPROVE}:"))
 async def approve(call: CallbackQuery, app_user: User, session: AsyncSession) -> None:
-    await call.answer()
-    if call.message is None or call.data is None:
-        return
-    try:
-        material_id = int(call.data.rsplit(":", 1)[-1])
-    except ValueError:
-        return
-    material = await MaterialModerationService(session).approve(
-        material_id, approved_by_user_id=app_user.id
-    )
-    if material is None:
-        await call.message.answer(MKT_MODERATION_NOT_FOUND, reply_markup=back_to_menu())
-        return
-    await call.message.answer(
-        MKT_MODERATION_APPROVED.format(id=material.id), reply_markup=back_to_menu()
-    )
+    await _moderate(call, app_user, session, action="approve")
 
 
 @moderation_router.callback_query(F.data.startswith(f"{CB_MOD_REJECT}:"))
 async def reject(call: CallbackQuery, app_user: User, session: AsyncSession) -> None:
+    await _moderate(call, app_user, session, action="reject")
+
+
+async def _moderate(
+    call: CallbackQuery, app_user: User, session: AsyncSession, *, action: str
+) -> None:
+    from bot.services.approval_policy import can_approve_marketing
+
     await call.answer()
     if call.message is None or call.data is None:
+        return
+    if not await can_approve_marketing(session, app_user):
+        await call.message.answer(
+            "Модерация доступна только Head of Marketing.", reply_markup=back_to_menu()
+        )
         return
     try:
         material_id = int(call.data.rsplit(":", 1)[-1])
     except ValueError:
         return
-    material = await MaterialModerationService(session).reject(
-        material_id, approved_by_user_id=app_user.id
-    )
+    service = MaterialModerationService(session)
+    if action == "approve":
+        material = await service.approve(material_id, approved_by_user_id=app_user.id)
+    else:
+        material = await service.reject(material_id, approved_by_user_id=app_user.id)
     if material is None:
         await call.message.answer(MKT_MODERATION_NOT_FOUND, reply_markup=back_to_menu())
         return
-    await call.message.answer(
-        MKT_MODERATION_REJECTED.format(id=material.id), reply_markup=back_to_menu()
-    )
+    template = MKT_MODERATION_APPROVED if action == "approve" else MKT_MODERATION_REJECTED
+    await call.message.answer(template.format(id=material.id), reply_markup=back_to_menu())
