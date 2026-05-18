@@ -7,12 +7,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Сначала только зависимости — будут кэшироваться отдельно от исходников.
+# pyproject и src нужны вместе для setuptools src-layout: pip install . без src
+# не установит сам пакет `bot` — будет ставиться только список зависимостей.
 COPY pyproject.toml ./
+COPY src ./src
 RUN pip install .
 
-# Исходники и миграции.
-COPY src ./src
+# Миграции в отдельном слое — их правки не пересобирают pip install.
 COPY alembic ./alembic
 COPY alembic.ini ./
 
