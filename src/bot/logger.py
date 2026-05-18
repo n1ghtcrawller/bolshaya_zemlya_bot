@@ -11,8 +11,7 @@ def configure_logging(settings: LoggingSettings) -> None:
     timestamper = structlog.processors.TimeStamper(fmt="iso")
     shared_processors: list = [
         structlog.contextvars.merge_contextvars,
-        structlog.stdlib.add_log_level,
-        structlog.stdlib.add_logger_name,
+        structlog.processors.add_log_level,
         timestamper,
     ]
 
@@ -34,4 +33,6 @@ def configure_logging(settings: LoggingSettings) -> None:
 
 
 def get_logger(name: str) -> structlog.stdlib.BoundLogger:
-    return structlog.get_logger(name)
+    # Биндим имя в контекст вместо stdlib-процессора add_logger_name,
+    # т.к. PrintLoggerFactory создаёт логгер без атрибута .name.
+    return structlog.get_logger().bind(logger=name)

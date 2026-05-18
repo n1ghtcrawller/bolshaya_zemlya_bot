@@ -44,3 +44,4 @@ logs/
 *.db
 data/postgres/
 data/redis/
+.claude
