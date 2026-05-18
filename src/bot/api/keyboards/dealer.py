@@ -74,10 +74,16 @@ def back_to_menu() -> InlineKeyboardMarkup:
     )
 
 
-def leads_list_kb(lead_ids: list[int]) -> InlineKeyboardMarkup:
+def leads_list_kb(items: list[tuple[int, str]]) -> InlineKeyboardMarkup:
+    from bot.api.keyboards import truncate
+
     rows = [
-        [InlineKeyboardButton(text=f"Открыть #{lid}", callback_data=f"{CB_LEAD_VIEW}:{lid}")]
-        for lid in lead_ids
+        [
+            InlineKeyboardButton(
+                text=truncate(label), callback_data=f"{CB_LEAD_VIEW}:{lid}"
+            )
+        ]
+        for lid, label in items
     ]
     rows.append(
         [InlineKeyboardButton(text="◀️ В меню", callback_data=DealerMenuCallback.BACK_TO_MENU)]
@@ -139,14 +145,16 @@ def materials_page_kb(
     category: SalesMaterialCategory,
     page: int,
     pages: int,
-    material_ids: list[int],
+    materials: list[tuple[int, str]],
 ) -> InlineKeyboardMarkup:
+    from bot.api.keyboards import truncate
+
     rows: list[list[InlineKeyboardButton]] = []
-    for mid in material_ids:
+    for mid, title in materials:
         rows.append(
             [
                 InlineKeyboardButton(
-                    text=f"📎 Скачать #{mid}",
+                    text=truncate(f"📎 {title}"),
                     callback_data=f"{CB_MATERIAL_SEND}:{mid}",
                 )
             ]
@@ -181,10 +189,16 @@ def materials_page_kb(
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def service_list_kb(request_ids: list[int]) -> InlineKeyboardMarkup:
+def service_list_kb(items: list[tuple[int, str]]) -> InlineKeyboardMarkup:
+    from bot.api.keyboards import truncate
+
     rows = [
-        [InlineKeyboardButton(text=f"Открыть #{rid}", callback_data=f"{CB_SERVICE_VIEW}:{rid}")]
-        for rid in request_ids
+        [
+            InlineKeyboardButton(
+                text=truncate(label), callback_data=f"{CB_SERVICE_VIEW}:{rid}"
+            )
+        ]
+        for rid, label in items
     ]
     rows.append(
         [InlineKeyboardButton(text="◀️ В меню", callback_data=DealerMenuCallback.BACK_TO_MENU)]

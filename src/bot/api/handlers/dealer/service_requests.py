@@ -59,9 +59,11 @@ async def show_list(call: CallbackQuery, app_user: User, session: AsyncSession) 
                 phone=r.contact_phone,
             )
         )
-    await call.message.answer(
-        "\n".join(lines), reply_markup=service_list_kb([r.id for r in items])
-    )
+    button_items = [
+        (r.id, f"#{r.id} · {_issue(r.issue_type.value)} · {r.equipment or 'без модели'}")
+        for r in items
+    ]
+    await call.message.answer("\n".join(lines), reply_markup=service_list_kb(button_items))
 
 
 @service_requests_router.callback_query(F.data.startswith(f"{CB_SERVICE_VIEW}:"))

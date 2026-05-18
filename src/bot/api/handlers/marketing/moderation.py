@@ -48,8 +48,15 @@ async def list_pending(call: CallbackQuery, session: AsyncSession) -> None:
                 title=m.title,
             )
         )
+    button_items = [
+        (
+            m.id,
+            f"{MATERIAL_CATEGORY_LABELS.get(m.category.value, m.category.value)} · {m.title}",
+        )
+        for m in items
+    ]
     await call.message.answer(
-        "\n".join(lines), reply_markup=moderation_list_kb([m.id for m in items])
+        "\n".join(lines), reply_markup=moderation_list_kb(button_items)
     )
 
 

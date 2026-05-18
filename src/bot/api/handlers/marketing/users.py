@@ -72,9 +72,11 @@ async def list_users(
     body_lines = [header, ""]
     for user in users:
         body_lines.append(f"• #{user.id} {user.full_name} (TG: {user.telegram_id})")
-    await call.message.answer(
-        "\n".join(body_lines), reply_markup=users_list_kb([u.id for u in users])
-    )
+    items = [
+        (u.id, f"{u.full_name}{(' · @' + u.username) if u.username else ''}")
+        for u in users
+    ]
+    await call.message.answer("\n".join(body_lines), reply_markup=users_list_kb(items))
 
 
 @users_router.callback_query(F.data.startswith(f"{CB_USER_VIEW}:open:"))

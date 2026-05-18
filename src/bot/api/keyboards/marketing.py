@@ -103,14 +103,16 @@ def marketing_main_menu() -> InlineKeyboardMarkup:
     )
 
 
-def moderation_list_kb(material_ids: list[int]) -> InlineKeyboardMarkup:
+def moderation_list_kb(items: list[tuple[int, str]]) -> InlineKeyboardMarkup:
+    from bot.api.keyboards import truncate
+
     rows = [
         [
             InlineKeyboardButton(
-                text=f"Открыть #{mid}", callback_data=f"{CB_MOD_VIEW}:{mid}"
+                text=truncate(label), callback_data=f"{CB_MOD_VIEW}:{mid}"
             )
         ]
-        for mid in material_ids
+        for mid, label in items
     ]
     rows.append(
         [InlineKeyboardButton(text="◀️ В меню", callback_data=MktMenuCallback.BACK_TO_MENU)]
@@ -291,14 +293,16 @@ def user_pick_role_kb(user_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def users_list_kb(user_ids: list[int]) -> InlineKeyboardMarkup:
+def users_list_kb(items: list[tuple[int, str]]) -> InlineKeyboardMarkup:
+    from bot.api.keyboards import truncate
+
     rows = [
         [
             InlineKeyboardButton(
-                text=f"Открыть #{uid}", callback_data=f"{CB_USER_VIEW}:open:{uid}"
+                text=truncate(label), callback_data=f"{CB_USER_VIEW}:open:{uid}"
             )
         ]
-        for uid in user_ids
+        for uid, label in items
     ]
     rows.append(
         [InlineKeyboardButton(text="◀️ В меню", callback_data=MktMenuCallback.BACK_TO_MENU)]
@@ -476,14 +480,16 @@ def content_card_kb(item_id: int, status_value: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def content_list_kb(item_ids: list[int]) -> InlineKeyboardMarkup:
+def content_list_kb(items: list[tuple[int, str]]) -> InlineKeyboardMarkup:
+    from bot.api.keyboards import truncate
+
     rows = [
         [
             InlineKeyboardButton(
-                text=f"Открыть #{i}", callback_data=f"{CB_CONTENT_VIEW}:{i}"
+                text=truncate(label), callback_data=f"{CB_CONTENT_VIEW}:{cid}"
             )
         ]
-        for i in item_ids
+        for cid, label in items
     ]
     rows.append(
         [InlineKeyboardButton(text="◀️ В меню", callback_data=MktMenuCallback.BACK_TO_MENU)]
@@ -528,10 +534,16 @@ def expos_menu_kb() -> InlineKeyboardMarkup:
     )
 
 
-def expos_list_kb(expo_ids: list[int]) -> InlineKeyboardMarkup:
+def expos_list_kb(items: list[tuple[int, str]]) -> InlineKeyboardMarkup:
+    from bot.api.keyboards import truncate
+
     rows = [
-        [InlineKeyboardButton(text=f"Открыть #{eid}", callback_data=f"{CB_EXPO_VIEW}:{eid}")]
-        for eid in expo_ids
+        [
+            InlineKeyboardButton(
+                text=truncate(label), callback_data=f"{CB_EXPO_VIEW}:{eid}"
+            )
+        ]
+        for eid, label in items
     ]
     rows.append(
         [InlineKeyboardButton(text="◀️ В меню", callback_data=MktMenuCallback.BACK_TO_MENU)]

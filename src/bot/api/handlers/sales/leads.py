@@ -81,7 +81,13 @@ async def list_new(call: CallbackQuery, session: AsyncSession) -> None:
         text.append(_render_short(lead))
     await call.message.answer(
         "\n".join(text),
-        reply_markup=leads_list_kb([l.id for l in leads], back=SalesMenuCallback.BACK_TO_MENU),
+        reply_markup=leads_list_kb(
+            [
+                (l.id, f"#{l.id} · {_lead_type_label(l.lead_type.value)} · {l.contact_name}")
+                for l in leads
+            ],
+            back=SalesMenuCallback.BACK_TO_MENU,
+        ),
     )
 
 
@@ -102,7 +108,13 @@ async def list_in_progress(
         text.append(_render_short(lead))
     await call.message.answer(
         "\n".join(text),
-        reply_markup=leads_list_kb([l.id for l in leads], back=SalesMenuCallback.BACK_TO_MENU),
+        reply_markup=leads_list_kb(
+            [
+                (l.id, f"#{l.id} · {_lead_type_label(l.lead_type.value)} · {l.contact_name}")
+                for l in leads
+            ],
+            back=SalesMenuCallback.BACK_TO_MENU,
+        ),
     )
 
 
@@ -123,7 +135,13 @@ async def list_transferred(
         text.append(_render_short(lead))
     await call.message.answer(
         "\n".join(text),
-        reply_markup=leads_list_kb([l.id for l in leads], back=SalesMenuCallback.BACK_TO_MENU),
+        reply_markup=leads_list_kb(
+            [
+                (l.id, f"#{l.id} · {_lead_type_label(l.lead_type.value)} · {l.contact_name}")
+                for l in leads
+            ],
+            back=SalesMenuCallback.BACK_TO_MENU,
+        ),
     )
 
 

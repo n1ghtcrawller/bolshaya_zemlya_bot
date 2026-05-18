@@ -60,8 +60,12 @@ async def show_queue(call: CallbackQuery, app_user: User, session: AsyncSession)
                 dealer_id=a.proposed_dealer_id,
             )
         )
+    button_items = [
+        (a.id, f"#{a.id} · лид #{a.lead_id} → диллер #{a.proposed_dealer_id}")
+        for a in items
+    ]
     await call.message.answer(
-        "\n".join(lines), reply_markup=hos_queue_list_kb([a.id for a in items])
+        "\n".join(lines), reply_markup=hos_queue_list_kb(button_items)
     )
 
 

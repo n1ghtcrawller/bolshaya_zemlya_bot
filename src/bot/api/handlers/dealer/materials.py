@@ -117,7 +117,9 @@ async def _render_page(
         lines.append("")
     await call.message.answer(
         "\n".join(lines).rstrip(),
-        reply_markup=materials_page_kb(category, page, pages, [m.id for m in items]),
+        reply_markup=materials_page_kb(
+            category, page, pages, [(m.id, m.title) for m in items]
+        ),
     )
 
 

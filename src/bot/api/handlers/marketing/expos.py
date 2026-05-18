@@ -60,8 +60,9 @@ async def list_upcoming(call: CallbackQuery, session: AsyncSession) -> None:
         lines.append(
             MKT_EXPO_LIST_LINE.format(id=expo.id, starts_at=expo.starts_at, title=expo.title)
         )
+    button_items = [(e.id, f"{e.starts_at:%d.%m} · {e.title}") for e in items]
     await call.message.answer(
-        "\n".join(lines), reply_markup=expos_list_kb([e.id for e in items])
+        "\n".join(lines), reply_markup=expos_list_kb(button_items)
     )
 
 

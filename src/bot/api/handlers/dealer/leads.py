@@ -57,9 +57,11 @@ async def show_leads(call: CallbackQuery, app_user: User, session: AsyncSession)
             )
         )
         lines.append(f"   {lead.contact_name} · {lead.contact_phone}")
-    await call.message.answer(
-        "\n".join(lines), reply_markup=leads_list_kb([lead.id for lead in leads])
-    )
+    items = [
+        (lead.id, f"#{lead.id} · {lead.contact_name}")
+        for lead in leads
+    ]
+    await call.message.answer("\n".join(lines), reply_markup=leads_list_kb(items))
 
 
 @leads_router.callback_query(F.data.startswith(f"{CB_LEAD_VIEW}:"))

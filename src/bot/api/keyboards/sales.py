@@ -101,10 +101,16 @@ def head_of_sales_main_menu() -> InlineKeyboardMarkup:
     )
 
 
-def hos_queue_list_kb(approval_ids: list[int]) -> InlineKeyboardMarkup:
+def hos_queue_list_kb(items: list[tuple[int, str]]) -> InlineKeyboardMarkup:
+    from bot.api.keyboards import truncate
+
     rows = [
-        [InlineKeyboardButton(text=f"Открыть #{aid}", callback_data=f"{CB_HOS_VIEW}:{aid}")]
-        for aid in approval_ids
+        [
+            InlineKeyboardButton(
+                text=truncate(label), callback_data=f"{CB_HOS_VIEW}:{aid}"
+            )
+        ]
+        for aid, label in items
     ]
     rows.append(
         [InlineKeyboardButton(text="◀️ В меню", callback_data=SalesMenuCallback.BACK_TO_MENU)]
@@ -144,10 +150,16 @@ def back_to_menu() -> InlineKeyboardMarkup:
     )
 
 
-def leads_list_kb(lead_ids: list[int], back: str) -> InlineKeyboardMarkup:
+def leads_list_kb(items: list[tuple[int, str]], back: str) -> InlineKeyboardMarkup:
+    from bot.api.keyboards import truncate
+
     rows = [
-        [InlineKeyboardButton(text=f"Открыть #{lid}", callback_data=f"{CB_LEAD_VIEW}:{lid}")]
-        for lid in lead_ids
+        [
+            InlineKeyboardButton(
+                text=truncate(label), callback_data=f"{CB_LEAD_VIEW}:{lid}"
+            )
+        ]
+        for lid, label in items
     ]
     rows.append([InlineKeyboardButton(text="◀️ Назад", callback_data=back)])
     return InlineKeyboardMarkup(inline_keyboard=rows)

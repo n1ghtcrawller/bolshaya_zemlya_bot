@@ -99,8 +99,11 @@ async def list_by_type(call: CallbackQuery, session: AsyncSession) -> None:
             lines.append(f"   ⏰ {item.scheduled_at:%d.%m.%Y %H:%M}")
         if item.telegram_file_id:
             lines.append(f"   📎 {item.file_type.value if item.file_type else 'media'}")
+    button_items = [
+        (i.id, f"#{i.id} · {_status_label(i.status.value)} · {i.title}") for i in items
+    ]
     await call.message.answer(
-        "\n".join(lines), reply_markup=content_list_kb([i.id for i in items])
+        "\n".join(lines), reply_markup=content_list_kb(button_items)
     )
 
 
@@ -123,8 +126,9 @@ async def list_pending(call: CallbackQuery, session: AsyncSession) -> None:
                 title=item.title,
             )
         )
+    button_items = [(i.id, f"#{i.id} · {_type_label(i.type.value)} · {i.title}") for i in items]
     await call.message.answer(
-        "\n".join(lines), reply_markup=content_list_kb([i.id for i in items])
+        "\n".join(lines), reply_markup=content_list_kb(button_items)
     )
 
 
