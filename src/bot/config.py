@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -44,9 +44,22 @@ class RedisSettings(BaseSettings):
     db: int = 0
     password: SecretStr | None = None
 
+    @field_validator("password", mode="before")
+    @classmethod
+    def _empty_password_as_none(cls, value):
+        # REDIS_PASSWORD= (пустая строка в .env) → None,
+        # иначе url подставит ":@" и Redis без auth ответит AuthenticationError.
+        if value in (None, "", b""):
+            return None
+        return value
+
     @property
     def url(self) -> str:
-        auth = f":{self.password.get_secret_value()}@" if self.password else ""
+        auth = (
+            f":{self.password.get_secret_value()}@"
+            if self.password and self.password.get_secret_value()
+            else ""
+        )
         return f"redis://{auth}{self.host}:{self.port}/{self.db}"
 
 
