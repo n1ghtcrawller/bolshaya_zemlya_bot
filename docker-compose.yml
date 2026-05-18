@@ -25,9 +25,27 @@ services:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
       - ./data/redis:/data
-    command: ["redis-server", "--appendonly", "yes"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    # Если REDIS_PASSWORD задан — включаем --requirepass, иначе стартуем без auth.
+    command:
+      - sh
+      - -c
+      - |
+        if [ -n "$$REDIS_PASSWORD" ]; then
+          exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"
+        else
+          exec redis-server --appendonly yes
+        fi
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+        - CMD-SHELL
+        - >
+          if [ -n "$$REDIS_PASSWORD" ]; then
+            redis-cli -a "$$REDIS_PASSWORD" --no-auth-warning ping;
+          else
+            redis-cli ping;
+          fi
       interval: 5s
       timeout: 3s
       retries: 10
