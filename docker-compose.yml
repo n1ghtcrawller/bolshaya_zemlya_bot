@@ -56,22 +56,30 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    # Внутри docker-сети hostname-ами выступают имена сервисов.
-    # Эти значения перекрывают POSTGRES_HOST / REDIS_HOST из .env, в котором стоит localhost
-    # (чтобы локальный запуск `python -m bot` тоже продолжал работать).
-    # N8N_BASE_URL указывает на n8n, развёрнутый ОТДЕЛЬНО на хост-машине
-    # (через host.docker.internal). Если n8n перенесёте в нашу docker-сеть —
-    # поменяйте значение на http://n8n:5678.
+    # POSTGRES_HOST / REDIS_HOST перекрывают значения из .env (там localhost
+    # — для локального запуска `python -m bot` без Docker).
+    # N8N_BASE_URL = http://n8n:5678 — n8n достижим по DNS-alias `n8n`
+    # в общей внешней сети (см. networks ниже). Альтернатива — публичный
+    # URL n8n (например, https://bz.n8n.mar-analytics.ru).
     environment:
       POSTGRES_HOST: postgres
       REDIS_HOST: redis
-      N8N_BASE_URL: http://host.docker.internal:5678
-    # Для Linux: host.docker.internal не резолвится без явного маппинга.
-    # На Mac/Windows строчка ниже игнорируется (там host.docker.internal уже работает).
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      N8N_BASE_URL: http://n8n:5678
+    networks:
+      - default
+      - n8n_external
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+networks:
+  default:
+    name: bz_default
+  # Сеть n8n, поднятого отдельным compose-проектом (n8n-compose-file).
+  # Бот подключается сюда, чтобы стучаться в n8n по DNS-имени `n8n`,
+  # не выходя на хост и не упираясь в loopback-only биндинг порта.
+  n8n_external:
+    external: true
+    name: n8n-compose-file_default
