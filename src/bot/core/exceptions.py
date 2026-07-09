@@ -12,3 +12,7 @@ class InvalidRoleError(BotError):
 
 class N8nUnavailableError(BotError):
     pass
+
+
+class BitrixUnavailableError(BotError):
+    pass

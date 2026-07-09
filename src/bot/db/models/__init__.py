@@ -1,3 +1,4 @@
+from bot.db.models.bitrix_outbox import BitrixOutbox
 from bot.db.models.broadcast import Broadcast
 from bot.db.models.client_profile import ClientProfile
 from bot.db.models.client_request import ClientRequest
@@ -12,6 +13,7 @@ from bot.db.models.service_request import ServiceRequest
 from bot.db.models.user import User
 
 __all__ = [
+    "BitrixOutbox",
     "Broadcast",
     "ClientProfile",
     "ClientRequest",

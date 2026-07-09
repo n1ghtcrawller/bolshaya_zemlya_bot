@@ -18,6 +18,7 @@ from bot.api.texts import (
     CLIENT_CHAT_INTRO,
     REQUEST_VALIDATION_FAILED,
 )
+from bot.config import Settings
 from bot.core.enums import LeadType
 from bot.db.models.user import User
 from bot.schemas.request import ClientRequestCreate
@@ -49,24 +50,32 @@ async def receive_topic(message: Message, state: FSMContext) -> None:
 
 @chat_router.message(ChatWithManagerSG.waiting_phone, F.contact)
 async def receive_contact(
-    message: Message, state: FSMContext, app_user: User, session: AsyncSession
+    message: Message,
+    state: FSMContext,
+    app_user: User,
+    session: AsyncSession,
+    settings: Settings,
 ) -> None:
     contact: Contact | None = message.contact
     if contact is None or not contact.phone_number:
         await message.answer(REQUEST_VALIDATION_FAILED)
         return
-    await _finalize(message, state, app_user, session, phone=contact.phone_number)
+    await _finalize(message, state, app_user, session, settings, phone=contact.phone_number)
 
 
 @chat_router.message(ChatWithManagerSG.waiting_phone, F.text)
 async def receive_phone_text(
-    message: Message, state: FSMContext, app_user: User, session: AsyncSession
+    message: Message,
+    state: FSMContext,
+    app_user: User,
+    session: AsyncSession,
+    settings: Settings,
 ) -> None:
     raw = (message.text or "").strip()
     if not any(ch.isdigit() for ch in raw):
         await message.answer(REQUEST_VALIDATION_FAILED)
         return
-    await _finalize(message, state, app_user, session, phone=raw)
+    await _finalize(message, state, app_user, session, settings, phone=raw)
 
 
 async def _finalize(
@@ -74,6 +83,7 @@ async def _finalize(
     state: FSMContext,
     app_user: User,
     session: AsyncSession,
+    settings: Settings,
     *,
     phone: str,
 ) -> None:
@@ -91,7 +101,7 @@ async def _finalize(
         await state.clear()
         return
 
-    service = RequestService(session)
+    service = RequestService(session, settings.bitrix)
     request = await service.create_for_user(app_user.id, payload)
     await state.clear()
     await message.answer(

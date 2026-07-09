@@ -21,6 +21,7 @@ from bot.api.texts import (
     REQUEST_CREATED,
     REQUEST_VALIDATION_FAILED,
 )
+from bot.config import Settings
 from bot.db.models.user import User
 from bot.schemas.request import ClientRequestCreate
 from bot.services.request_service import RequestService
@@ -99,7 +100,11 @@ async def receive_comment(message: Message, state: FSMContext) -> None:
     CreateRequestSG.confirm, F.data == "client:req:confirm"
 )
 async def confirm_request(
-    call: CallbackQuery, app_user: User, session: AsyncSession, state: FSMContext
+    call: CallbackQuery,
+    app_user: User,
+    session: AsyncSession,
+    state: FSMContext,
+    settings: Settings,
 ) -> None:
     await call.answer()
     if call.message is None:
@@ -117,7 +122,7 @@ async def confirm_request(
         await state.clear()
         return
 
-    service = RequestService(session)
+    service = RequestService(session, settings.bitrix)
     request = await service.create_for_user(app_user.id, payload)
     await state.clear()
     await call.message.answer(

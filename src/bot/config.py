@@ -90,6 +90,39 @@ class N8nSettings(BaseSettings):
         return value
 
 
+class BitrixSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="BITRIX_", env_file=".env", extra="ignore")
+
+    enabled: bool = False
+    # Полный URL входящего вебхука Bitrix24 до метода, напр.
+    # https://portal.bitrix24.ru/rest/1/<code>/  — клиент дописывает crm.lead.add.json
+    webhook_url: SecretStr | None = None
+    source_id: str = "WEB"  # Bitrix SOURCE_ID для всех лидов из бота
+    # CSV ID ответственных для round-robin распределения, напр. "25,23,19,21" (опц.).
+    # Пусто → ответственным становится владелец вебхука.
+    assigned_by_ids: str | None = None
+    title_prefix: str = "Telegram-бот"
+    # Код пользовательского поля для типа лида, напр. UF_CRM_1700000000 (опц.)
+    uf_lead_type_field: str | None = None
+    request_timeout: int = 30
+    dispatch_interval_seconds: int = 60
+    max_attempts: int = 10
+    retry_backoff_base_seconds: int = 60
+
+    @field_validator("webhook_url", "uf_lead_type_field", "assigned_by_ids", mode="before")
+    @classmethod
+    def _empty_as_none(cls, value):
+        if value in (None, "", b""):
+            return None
+        return value
+
+    def responsible_ids(self) -> list[int]:
+        """Список ID ответственных из CSV; пусто → []."""
+        if not self.assigned_by_ids:
+            return []
+        return [int(p.strip()) for p in self.assigned_by_ids.split(",") if p.strip()]
+
+
 class PublisherSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="PUBLISHER_", env_file=".env", extra="ignore")
 
@@ -111,6 +144,7 @@ class Settings:
         self.redis = RedisSettings()
         self.cache = CacheSettings()
         self.n8n = N8nSettings()
+        self.bitrix = BitrixSettings()
         self.publisher = PublisherSettings()
         self.logging = LoggingSettings()
 

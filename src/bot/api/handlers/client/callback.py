@@ -18,6 +18,7 @@ from bot.api.texts import (
     CLIENT_CALLBACK_INTRO,
     REQUEST_VALIDATION_FAILED,
 )
+from bot.config import Settings
 from bot.core.enums import LeadType
 from bot.db.models.user import User
 from bot.schemas.request import ClientRequestCreate
@@ -60,7 +61,11 @@ async def phone_text(message: Message, state: FSMContext) -> None:
 
 @callback_router.message(CallbackSG.waiting_note, F.text)
 async def note(
-    message: Message, state: FSMContext, app_user: User, session: AsyncSession
+    message: Message,
+    state: FSMContext,
+    app_user: User,
+    session: AsyncSession,
+    settings: Settings,
 ) -> None:
     raw = (message.text or "").strip()
     note_text = None if raw == "-" else raw
@@ -83,7 +88,7 @@ async def note(
         await state.clear()
         return
 
-    service = RequestService(session)
+    service = RequestService(session, settings.bitrix)
     request = await service.create_for_user(app_user.id, payload)
     await state.clear()
     await message.answer(

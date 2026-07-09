@@ -15,6 +15,8 @@ from bot.cache.role_cache import RoleCache
 from bot.config import get_settings
 from bot.db.session import build_engine, build_sessionmaker
 from bot.logger import configure_logging, get_logger
+from bot.services.bitrix_client import BitrixClient
+from bot.services.bitrix_dispatcher import dispatch_pending_leads
 from bot.services.content_publisher import publish_due_content
 from bot.services.n8n_client import N8nClient
 
@@ -30,6 +32,7 @@ async def main() -> None:
     role_cache = RoleCache(redis, settings.cache.role_cache_ttl)
     http_client = httpx.AsyncClient()
     n8n = N8nClient(settings.n8n, http_client)
+    bitrix = BitrixClient(settings.bitrix, http_client)
 
     storage = RedisStorage(redis=redis)
     bot = Bot(
@@ -59,13 +62,31 @@ async def main() -> None:
             max_instances=1,
             coalesce=True,
         )
-        scheduler.start()
         log.info(
             "content_publisher_scheduled",
             interval_seconds=settings.publisher.interval_seconds,
         )
     else:
         log.info("content_publisher_disabled")
+
+    if settings.bitrix.enabled:
+        scheduler.add_job(
+            dispatch_pending_leads,
+            trigger=IntervalTrigger(seconds=settings.bitrix.dispatch_interval_seconds),
+            kwargs={"sessionmaker": sessionmaker, "bitrix": bitrix, "settings": settings.bitrix},
+            id="bitrix_dispatcher",
+            max_instances=1,
+            coalesce=True,
+        )
+        log.info(
+            "bitrix_dispatcher_scheduled",
+            interval_seconds=settings.bitrix.dispatch_interval_seconds,
+        )
+    else:
+        log.info("bitrix_dispatcher_disabled")
+
+    if scheduler.get_jobs():
+        scheduler.start()
 
     log.info("bot_started")
     try:

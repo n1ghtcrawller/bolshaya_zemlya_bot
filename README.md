@@ -1,6 +1,8 @@
 # Bot «Большая Земля»
 
-Telegram-бот для проекта «Большая Земля» (с/х техника). 6 ролей, 11 моделей данных, 4 интеграции с n8n, фоновый автопостинг, 30 unit/integration-тестов.
+Telegram-бот для проекта «Большая Земля» (с/х техника). 6 ролей, 12 моделей данных, 4 интеграции с n8n + сбор лидов в Bitrix24, фоновый автопостинг, unit/integration-тесты.
+
+📖 Полная записка по пользовательским и админским сценариям — [docs/SCENARIOS.md](docs/SCENARIOS.md).
 
 ## Стек
 
@@ -165,7 +167,7 @@ Sales → карточка диллера →
 
 ## База данных
 
-11 моделей (10 миграций):
+12 моделей (12 миграций):
 
 | Модель | Назначение |
 |---|---|
@@ -181,6 +183,7 @@ Sales → карточка диллера →
 | `content_items` | Контент-записи Маркетинга (4 типа, медиа, статусы согласования) |
 | `broadcasts` | История рассылок (текст, медиа, сегмент, sent_count, error) |
 | `expos` | Выставки (название, локация, даты, продукты, описание) |
+| `bitrix_outbox` | Очередь гарантированной доставки лидов в Bitrix24 (payload, status, attempts, bitrix_lead_id) |
 
 Миграции в [alembic/versions/](alembic/versions/) — последовательно применяются `alembic upgrade head`.
 
@@ -215,6 +218,29 @@ redis-cli DEL user:role:123456789
 В папке [n8n/](n8n/) лежат **готовые JSON-файлы** для импорта в n8n + подробная [n8n/README.md](n8n/README.md) с настройкой credentials. В [n8n/test/](n8n/test/) — curl-скрипты для ручной проверки webhook-ов.
 
 При недоступности n8n: AI-ассистенты показывают «временно недоступен» (не падают). Рассылки помечаются `failed`. Автопостинг повторяет на следующем тике.
+
+## Bitrix24: сбор лидов
+
+Каждый новый лид (заявка / консультация / обратный звонок / сервисное обращение) при включённой интеграции автоматически уходит в CRM Bitrix24 как **Лид** (`crm.lead.add`) через **прямой входящий вебхук** (без n8n).
+
+**Гарантированная доставка (outbox).** В той же транзакции, что и сам лид, создаётся строка в `bitrix_outbox` (`status=pending`). Фоновый воркер ([bitrix_dispatcher.py](src/bot/services/bitrix_dispatcher.py)) внутри бот-процесса раз в `BITRIX_DISPATCH_INTERVAL_SECONDS` забирает «созревшие» строки и шлёт их в Bitrix:
+
+```
+лид создан → bitrix_outbox(pending) ──► [bitrix_dispatcher tick]
+                                          ├─ успех  → status=sent, bitrix_lead_id
+                                          └─ ошибка → attempts++, backoff (next_attempt_at)
+                                                      после BITRIX_MAX_ATTEMPTS → status=failed
+```
+
+Backoff экспоненциальный: `BITRIX_RETRY_BACKOFF_BASE_SECONDS * 2^(attempts-1)`, не более часа. Защита воркера — `max_instances=1, coalesce=True` (рассчитан на один процесс бота).
+
+**Одна воронка, тип в поле.** Все обращения идут в общую лид-воронку; тип различается ярлыком в `SOURCE_DESCRIPTION` (и опционально в пользовательском поле `BITRIX_UF_LEAD_TYPE_FIELD`), подробности — в `COMMENTS`. Маппинг типов — [bitrix_lead_builder.py](src/bot/services/bitrix_lead_builder.py).
+
+**Распределение ответственных.** Если задан `BITRIX_ASSIGNED_BY_IDS` (CSV, напр. `25,23,19,21`), бот раскидывает лиды между менеджерами round-robin «по очереди» (`ids[outbox.id % N]`). Распределение стабильно для строки — ретраи уходят тому же менеджеру. Пусто → ответственным становится владелец вебхука. (Штатная «Очередь распределения» Bitrix к лидам из `crm.lead.add` сама по себе не применяется.)
+
+**Настройка вебхука в Bitrix:** CRM → Разработчикам → Другое → Входящий вебхук → право доступа `crm`. Скопировать URL вида `https://<portal>.bitrix24.ru/rest/<user_id>/<code>/` в `BITRIX_WEBHOOK_URL`.
+
+При `BITRIX_ENABLED=false` строки в очередь не пишутся и воркер не запускается.
 
 ## Автопостинг контента (cron)
 
@@ -257,7 +283,7 @@ bot_bolshaya_zemlya/
 ├── .env.example
 ├── alembic/
 │   ├── env.py
-│   └── versions/               # 10 миграций (0001 → 0010)
+│   └── versions/               # 12 миграций (0001 → 0012)
 ├── src/bot/
 │   ├── __main__.py             # entry-point: bot + scheduler
 │   ├── config.py               # pydantic-settings (Telegram/Postgres/Redis/N8n/Publisher/Logging)
@@ -307,6 +333,16 @@ bot_bolshaya_zemlya/
 | `N8N_BASE_URL` | Базовый URL n8n | `http://localhost:5678` |
 | `N8N_WEBHOOK_*` | Пути четырёх webhook-ов | см. `.env.example` |
 | `N8N_REQUEST_TIMEOUT` | Таймаут httpx на вызовы n8n | `30` |
+| `BITRIX_ENABLED` | Включить отправку лидов в Bitrix24 | `false` |
+| `BITRIX_WEBHOOK_URL` | URL входящего вебхука Bitrix (до кода, без метода) | — |
+| `BITRIX_SOURCE_ID` | `SOURCE_ID` лида в Bitrix | `WEB` |
+| `BITRIX_ASSIGNED_BY_IDS` | ID ответственных через запятую, round-robin «по очереди» (опц.) | — |
+| `BITRIX_TITLE_PREFIX` | Префикс заголовка лида | `Telegram-бот` |
+| `BITRIX_UF_LEAD_TYPE_FIELD` | UF-поле лида для типа обращения (опц.) | — |
+| `BITRIX_REQUEST_TIMEOUT` | Таймаут httpx на вызовы Bitrix | `30` |
+| `BITRIX_DISPATCH_INTERVAL_SECONDS` | Период тика воркера-диспетчера | `60` |
+| `BITRIX_MAX_ATTEMPTS` | Макс. попыток доставки до `failed` | `10` |
+| `BITRIX_RETRY_BACKOFF_BASE_SECONDS` | База backoff между ретраями | `60` |
 | `PUBLISHER_ENABLED` | Включить автопостинг | `true` |
 | `PUBLISHER_INTERVAL_SECONDS` | Период тиков воркера | `60` |
 | `LOG_LEVEL` | `DEBUG` / `INFO` / `WARNING` / `ERROR` | `INFO` |

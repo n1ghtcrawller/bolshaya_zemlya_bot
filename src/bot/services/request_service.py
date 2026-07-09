@@ -2,20 +2,29 @@ from collections.abc import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from bot.config import BitrixSettings
+from bot.core.enums import BitrixLeadSource
 from bot.db.models.client_request import ClientRequest
+from bot.db.models.user import User
+from bot.db.repositories.bitrix_outbox import BitrixOutboxRepository
 from bot.db.repositories.client_profile import ClientProfileRepository
 from bot.db.repositories.client_request import ClientRequestRepository
 from bot.logger import get_logger
 from bot.schemas.request import ClientRequestCreate
+from bot.services.bitrix_lead_builder import normalize_client_request
 
 log = get_logger(__name__)
 
 
 class RequestService:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+        self, session: AsyncSession, bitrix_settings: BitrixSettings | None = None
+    ) -> None:
         self._session = session
         self._requests = ClientRequestRepository(session)
         self._profiles = ClientProfileRepository(session)
+        self._outbox = BitrixOutboxRepository(session)
+        self._bitrix_enabled = bool(bitrix_settings and bitrix_settings.enabled)
 
     async def create_for_user(self, user_id: int, payload: ClientRequestCreate) -> ClientRequest:
         request = await self._requests.create(
@@ -28,6 +37,14 @@ class RequestService:
         )
         # Кэшируем телефон в профиле клиента — пригодится при следующих заявках.
         await self._profiles.upsert(user_id=user_id, phone=payload.contact_phone)
+        if self._bitrix_enabled:
+            # Та же сессия → лид и строка outbox коммитятся атомарно.
+            user = await self._session.get(User, user_id)
+            await self._outbox.create(
+                source_type=BitrixLeadSource.CLIENT_REQUEST,
+                source_id=request.id,
+                payload=normalize_client_request(request, user),
+            )
         log.info("client_request_created", request_id=request.id, user_id=user_id)
         return request
 

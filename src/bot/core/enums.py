@@ -83,3 +83,14 @@ class ApprovalStatus(StrEnum):
     APPROVED = "approved"
     PENDING = "pending"
     REJECTED = "rejected"
+
+
+class BitrixSyncStatus(StrEnum):
+    PENDING = "pending"
+    SENT = "sent"
+    FAILED = "failed"
+
+
+class BitrixLeadSource(StrEnum):
+    CLIENT_REQUEST = "client_request"
+    SERVICE_REQUEST = "service_request"

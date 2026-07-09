@@ -1,3 +1,4 @@
+from bot.db.repositories.bitrix_outbox import BitrixOutboxRepository
 from bot.db.repositories.broadcast import BroadcastRepository
 from bot.db.repositories.client_profile import ClientProfileRepository
 from bot.db.repositories.client_request import ClientRequestRepository
@@ -13,6 +14,7 @@ from bot.db.repositories.service_request import ServiceRequestRepository
 from bot.db.repositories.user import UserRepository
 
 __all__ = [
+    "BitrixOutboxRepository",
     "BroadcastRepository",
     "ClientProfileRepository",
     "ClientRequestRepository",
